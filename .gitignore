@@ -27,4 +27,8 @@
 *.out
 *.app
 
+# ignore some sync files
 .gitignore_conflict-*
+
+# ignore 
+README
