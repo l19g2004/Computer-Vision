@@ -176,10 +176,14 @@ int main(int argc, char** argv) {
 
     //  ====(a)==== 2D Filtering - using opencv "GaussianBlur()" ====
 	tick = getTickCount();
-	// TODO: implement your solution here:
-	// ...
+
+    GaussianBlur(bonn_gray, img_gb, Size(0,0), sigma);
+
 	tock = getTickCount();
 	cout << "OpenCV GaussianBlur() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
+
+
+
 
     //  ====(b)==== 2D Filtering - using opencv "filter2D()" ==== 
 	// Compute gaussian kernel manually
@@ -191,13 +195,13 @@ int main(int argc, char** argv) {
 		for (int x = 0; x < kernel2D.cols; ++x) {
 			const int dx = abs(k_width-x);
 			//TODO: Fill kernel2D matrix with values of a gaussian
-			// ...
+            //kernel2D.at<float>(y,x) = (1/(2*M_PI*sigma*sigma))*exp(-((x*x+y*y)/(2*sigma*sigma)));
 		}
 	}
 	kernel2D *= 1. / sum(kernel2D)[0];
 	
 	// TODO: implement your solution here - use "filter2D"
-	// ...
+    filter2D(bonn_gray, img_f2D, -1, kernel2D);
 	
 	tock = getTickCount();
 	cout << "OpenCV filter2D() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
@@ -205,12 +209,20 @@ int main(int argc, char** argv) {
     //  ====(c)==== 2D Filtering - using opencv "sepFilter2D()" ====
 	tick = getTickCount();
 	// TODO: implement your solution here
-	
+    sepFilter2D(bonn_gray, img_sepF2D, -1, kernel2D.t(), kernel2D);
+
 	tock = getTickCount();
 	cout << "OpenCV sepFilter2D() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
-	// TODO: Show result images
-	// ...
+    // Show result images
+    namedWindow("Task4: (a) grayimage", WINDOW_AUTOSIZE);
+    imshow("Task4: (a) grayimage", bonn_gray);
+    namedWindow("Task4: (a) GaussianBlur", WINDOW_AUTOSIZE);
+    imshow("Task4: (a) GaussianBlur", img_gb);
+    namedWindow("Task4: (b) filter2D", WINDOW_AUTOSIZE);
+    imshow("Task4: (b) filter2D", img_f2D);
+    namedWindow("Task4: (c) sepFilter2D", WINDOW_AUTOSIZE);
+    imshow("Task4: (c) sepFilter2D", img_sepF2D);
 
 	// compare blurring methods
 	// TODO: Compute absolute differences between pixel intensities of (a), (b) and (c) using "absdiff"
@@ -219,8 +231,11 @@ int main(int argc, char** argv) {
 	// TODO: Find the maximum pixel error using "minMaxLoc"
 	// ...
 
-	//waitKey(0);
-	//destroyAllWindows();	
+
+
+
+    waitKey(0);
+    destroyAllWindows();
 	
 //	=========================================================================	
 //	==================== Solution of task 6 =================================
