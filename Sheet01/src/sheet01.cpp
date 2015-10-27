@@ -36,14 +36,13 @@ int main(int argc, char** argv) {
 		const int y1 = rng.uniform(0, bonn_gray.rows);
 		const int y2 = rng.uniform(0, bonn_gray.rows);
 		
-		//TODO: Draw the rectangle into the image "img_task1"
-		// ...
+        r = Rect(x1, y1, (x2-x1), (y2-y1));
+
+        // Draw the rectangle into the image "img_task1"
         rectangle(img_task1, Point(x1,y1),Point(x2,y2), Scalar(0,255,0));
 
 	}
-	//TODO: Display the image "img_task1" with the rectangles
-	// ...
-	
+    // Display the image "img_task1" with the rectangles
     namedWindow("(a) draw random rectangles", WINDOW_AUTOSIZE);
     imshow("(a) draw random rectangles", img_task1);
 
@@ -66,10 +65,15 @@ int main(int argc, char** argv) {
 				for (int x = r.x; x < r.x+r.width; ++x) {
 				  	//TODO: Sum up all pixels at "bonn_gray.at<uchar>(y,x)" inside the rectangle and store it in "sumOfPixels" 
 					// ...
+                    sumOfPixels += bonn_gray.at<uchar>(y,x);
 				}
-			}
+			} 
 		}
 	}
+    // normalize
+    sumOfPixels /= (sizeof(rects)/sizeof(rects[0])); // all rectangles
+    sumOfPixels /= 10; // repeat 10 times
+
 	tock = getTickCount();
 	cout << "Summing up each pixel gives " << sumOfPixels << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
