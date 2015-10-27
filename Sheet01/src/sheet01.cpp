@@ -36,18 +36,16 @@ int main(int argc, char** argv) {
 		const int y1 = rng.uniform(0, bonn_gray.rows);
 		const int y2 = rng.uniform(0, bonn_gray.rows);
 		
-        r = Rect(x1, y1, (x2-x1), (y2-y1));
+        // set points to the top-left corner
+        r = Rect(Point(x1, y1), Point(x2,y2));
 
         // Draw the rectangle into the image "img_task1"
         rectangle(img_task1, Point(x1,y1),Point(x2,y2), Scalar(0,255,0));
 
 	}
     // Display the image "img_task1" with the rectangles
-    namedWindow("(a) draw random rectangles", WINDOW_AUTOSIZE);
-    imshow("(a) draw random rectangles", img_task1);
-
-    waitKey(0);
-    destroyAllWindows(); // closes all open windows
+    namedWindow("Task1: (a) draw random rectangles", WINDOW_AUTOSIZE);
+    imshow("Task1: (a) draw random rectangles", img_task1);
 
 	//====(b)==== summing up method ====
 	// Variables for time measurements
@@ -85,19 +83,23 @@ int main(int argc, char** argv) {
 
     Mat rectIntegral;
     integral(bonn_gray, rectIntegral);
-    double meanIntegrals = 0.0;
+    double meanIntegrals;
     for (size_t n = 0; n < 10; ++n) {
+        meanIntegrals = 0.0;
         for (auto& r : rects) {
-            meanIntegrals +=  ( bonn_gray.at<uchar>((r.y + r.height), (r.x + r.width)) -
-                                bonn_gray.at<uchar>((r.y + r.height), (r.x)) -
-                                bonn_gray.at<uchar>((r.y), (r.x + r.width)) +
-                                bonn_gray.at<uchar>((r.y), (r.x))
+            meanIntegrals +=  0.25*( rectIntegral.at<int>(r.br())
+                                - rectIntegral.at<int>((r.y + r.height), (r.x))
+                                - rectIntegral.at<int>((r.y), (r.x + r.width))
+                                + rectIntegral.at<int>(r.tl())
                                 );
 
         }
     }
     // normalize
-    //meanIntegrals /= (sizeof(rects)/sizeof(*rects));
+    meanIntegrals /= (sizeof(rects)/sizeof(*rects));
+
+    cout << "<-------- fix is needed" << endl;
+
 
     tock = getTickCount();
     cout << "computing an integral image gives " << meanIntegrals << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
@@ -107,8 +109,8 @@ int main(int argc, char** argv) {
 	//TODO: implement your solution here
 	// ...
 
-	// waitKey(0); // waits until the user presses a button and then continues with task 2 -> uncomment this
-	// destroyAllWindows(); // closes all open windows -> uncomment this
+    waitKey(0); // waits until the user presses a button and then continues with task 2 -> uncomment this
+    destroyAllWindows(); // closes all open windows -> uncomment this
 	
 //	=========================================================================	
 //	==================== Solution of task 2 =================================
@@ -118,10 +120,8 @@ int main(int argc, char** argv) {
 	
 	//====(a)==== Histogram equalization - using opencv "equalizeHist" ====
 	Mat ocvHistEqualization;
-	//TODO: implement your solution of here
-	// ...
-	
-	
+    equalizeHist(bonn_gray, ocvHistEqualization);
+
 	//====(b)==== Histogram equalization - custom implementation ====
 	Mat myHistEqualization(bonn_gray.size(), bonn_gray.type()); 
 
@@ -140,23 +140,30 @@ int main(int argc, char** argv) {
 		hist[i] += hist[i-1];
 	}
 	
-	// TODO: Fill the matrix "myHistEqualization" -> replace old intensity values with new intensities taken from the integral histogram
-	// ...
+    // Fill the matrix "myHistEqualization" -> replace old intensity values with new intensities taken from the integral histogram
+    for (int y=0; y < bonn_gray.rows; ++y) {
+        for (int x=0;  x < bonn_gray.cols; ++x) {
+            myHistEqualization.at<uchar>(y,x) = hist[bonn_gray.at<uchar>(y,x)];
+        }
+    }
 	
-	// TODO: Show the results of (a) and (b)
-	// ...
+    // Show the results of (a) and (b)
+    namedWindow("Task2: (a) with equalizeHist", WINDOW_AUTOSIZE);
+    imshow("Task2: (a) with equalizeHist", ocvHistEqualization);
+    namedWindow("Task2: (b) without equalizeHist", WINDOW_AUTOSIZE);
+    imshow("Task2: (b) without equalizeHist", ocvHistEqualization);
 	
 	//====(c)==== Difference between openCV implementation and custom implementation ====
 	// TODO: Compute absolute differences between pixel intensities of (a) and (b) using "absdiff"
-	// ... Just uncomment the following lines:
-	// Mat diff;
-	// absdiff(myHistEqualization, ocvHistEqualization, diff);
-	// double minVal, maxVal;
-	// minMaxLoc(diff, &minVal, &maxVal);
-	// cout << "maximum pixel error: " << maxVal << endl;
 
-	//waitKey(0);
-	//destroyAllWindows();
+    Mat diff;
+    absdiff(myHistEqualization, ocvHistEqualization, diff);
+    double minVal, maxVal;
+    minMaxLoc(diff, &minVal, &maxVal);
+    cout << "maximum pixel error: " << maxVal << endl;
+
+    waitKey(0);
+    destroyAllWindows();
 	
 //	=========================================================================	
 //	==================== Solution of task 4 =================================
