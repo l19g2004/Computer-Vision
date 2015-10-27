@@ -38,13 +38,18 @@ int main(int argc, char** argv) {
 		
 		//TODO: Draw the rectangle into the image "img_task1"
 		// ...
+        rectangle(img_task1, Point(x1,y1),Point(x2,y2), Scalar(0,255,0));
+
 	}
 	//TODO: Display the image "img_task1" with the rectangles
 	// ...
 	
-	
-	// waitKey(0);
-	
+    namedWindow("(a) draw random rectangles", WINDOW_AUTOSIZE);
+    imshow("(a) draw random rectangles", img_task1);
+
+    waitKey(0);
+    destroyAllWindows(); // closes all open windows
+
 	//====(b)==== summing up method ====
 	// Variables for time measurements
 	int64_t tick, tock;
