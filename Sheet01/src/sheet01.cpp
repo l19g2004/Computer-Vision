@@ -53,35 +53,55 @@ int main(int argc, char** argv) {
 	// Variables for time measurements
 	int64_t tick, tock;
 	double sumOfPixels;
-
+    double sumOfPixelsPerRect;
 	// Measure the time
 	tick = getTickCount();
 	
 	// Repeat 10 times
 	for (size_t n = 0; n < 10; ++n) {
 		sumOfPixels = 0.0;
+        sumOfPixelsPerRect = 0.0;
 		for (auto& r : rects) {
 			for (int y = r.y; y < r.y + r.height; ++y) {
 				for (int x = r.x; x < r.x+r.width; ++x) {
 				  	//TODO: Sum up all pixels at "bonn_gray.at<uchar>(y,x)" inside the rectangle and store it in "sumOfPixels" 
 					// ...
                     sumOfPixels += bonn_gray.at<uchar>(y,x);
+                    sumOfPixelsPerRect++;
 				}
 			} 
 		}
 	}
     // normalize
-    sumOfPixels /= (sizeof(rects)/sizeof(rects[0])); // all rectangles
-    sumOfPixels /= 10; // repeat 10 times
+    sumOfPixels /= sumOfPixelsPerRect;
 
 	tock = getTickCount();
 	cout << "Summing up each pixel gives " << sumOfPixels << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
 	// //====(c)==== integral image method - using OpenCV function "integral" ==== 
-	
-	//TODO: implement your solution of here
-	// ...
-	
+
+    // Measure the time
+    tick = getTickCount();
+
+    Mat rectIntegral;
+    integral(bonn_gray, rectIntegral);
+    double meanIntegrals = 0.0;
+    for (size_t n = 0; n < 10; ++n) {
+        for (auto& r : rects) {
+            meanIntegrals +=  ( bonn_gray.at<uchar>((r.y + r.height), (r.x + r.width)) -
+                                bonn_gray.at<uchar>((r.y + r.height), (r.x)) -
+                                bonn_gray.at<uchar>((r.y), (r.x + r.width)) +
+                                bonn_gray.at<uchar>((r.y), (r.x))
+                                );
+
+        }
+    }
+    // normalize
+    //meanIntegrals /= (sizeof(rects)/sizeof(*rects));
+
+    tock = getTickCount();
+    cout << "computing an integral image gives " << meanIntegrals << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
+
 	
 	//====(d)==== integral image method - custom implementation====
 	//TODO: implement your solution here
