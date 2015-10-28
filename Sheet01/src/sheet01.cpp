@@ -233,7 +233,9 @@ int main(int argc, char** argv) {
   //  sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D, kernel2D);
         filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
 
-	tock = getTickCount();
+    cout << "<-------- fix is needed" << endl;
+
+    tock = getTickCount();
 	cout << "OpenCV sepFilter2D() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
     // Show result images
@@ -315,27 +317,42 @@ int main(int argc, char** argv) {
 		for (int x=0; x < bonn_gray.cols; ++x) {
 			uchar& pix = bonn_salt_pepper.at<uchar>(y,x);
 			if (pix < 15) {
-			  // TODO: Set set pixel "pix" to black
+              // Set set pixel "pix" to black
+                bonn_salt_pepper.at<uchar>(y,x) = 0;
 			}else if (pix >= 85) { 
-			  // TODO: Set set pixel "pix" to white
+              // Set set pixel "pix" to white
+                bonn_salt_pepper.at<uchar>(y,x) = 255;
 			}else { 
-			  // TODO: Set set pixel "pix" to its corresponding intensity value in bonn_gray
+              // Set set pixel "pix" to its corresponding intensity value in bonn_gray
+                bonn_salt_pepper.at<uchar>(y,x) = bonn_gray.at<uchar>(y,x);
 			}
 		}
 	}
-	// imshow("bonn.png with salt and pepper", bonn_salt_pepper);	
+
+    imshow("Task7: bonn.png with salt and pepper", bonn_salt_pepper);
+
     //  ====(a)==================================================================
-	// TODO: implement your solution here
-	// ...
+    // Gaussian kernel
+    Mat imageGaussianFilter;
+    GaussianBlur(bonn_salt_pepper, imageGaussianFilter, Size(0,0), 2.2);
+
     //  ====(b)==================================================================	
-	// TODO: implement your solution here
-	// ...		
+    // Median filter medianBlur
+    Mat imageMedianBlurFilter;
+    medianBlur(bonn_salt_pepper, imageMedianBlurFilter, 5);
+
     //  ====(c)==================================================================	
-	// TODO: implement your solution here
-	// ...		
+    // Bilateral filter
+    Mat imageBilateralFilter;
+    bilateralFilter(bonn_salt_pepper, imageBilateralFilter, 30, 250, 250);
 	
-	//waitKey(0);
-	//destroyAllWindows();	
+    imshow("Task7: Gaussian kernel", imageGaussianFilter);
+    imshow("Task7: Median filter", imageMedianBlurFilter);
+    imshow("Task7: Bilateral", imageBilateralFilter);
+
+
+    waitKey(0);
+    destroyAllWindows();
 //	=========================================================================	
 //	==================== Solution of task 8 =================================
 //	=========================================================================	
