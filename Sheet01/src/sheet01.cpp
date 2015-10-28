@@ -362,20 +362,43 @@ int main(int argc, char** argv) {
 	Mat kernel2 = (Mat_<float>(3,3) << -0.8984, 0.1472, 1.1410, -1.9075, 0.1566, 2.1359, -0.8659, 0.0573, 1.0337);
 	
     //  ====(a)==================================================================
-	// TODO: implement your solution here
-	// ...
+    Mat imagefilter2DKernel1;
+    Mat imagefilter2DKernel2;
+
+    filter2D(bonn_gray, imagefilter2DKernel1, bonn_gray.depth() , kernel1);
+    filter2D(bonn_gray, imagefilter2DKernel2, bonn_gray.depth() , kernel2);
+
+    imshow("Task8: filter2D kernel 1", imagefilter2DKernel1);
+    imshow("Task8: filter2D kernel 2", imagefilter2DKernel2);
+
     //  ====(b)==================================================================	
-	// TODO: implement your solution here
-	// ...		
+    Mat imageSVDKernel1;
+    Mat imageSVDKernel2;
+
+    bonn_gray.copyTo(imageSVDKernel1);
+    bonn_gray.copyTo(imageSVDKernel2);
+
+    cout << "<-------- fix is needed" << endl;
+
+    imshow("Task8: SVD kernel 1", imageSVDKernel1);
+    imshow("Task8: SVD kernel 2", imageSVDKernel2);
+
     //  ====(c)==================================================================	
-	// TODO: implement your solution here
-	// ...			
+    // compute the absolute pixel-wise difference between the
+    // results, and print the maximum pixel error.
+    Mat diff8;
+    double minVal8, maxVal8;
+    absdiff(imagefilter2DKernel1, imageSVDKernel1, diff8);
+    minMaxLoc(diff8, &minVal8, &maxVal8);
+    cout << "maximum pixel error (kernel 1): " << maxVal8 << endl;
+    absdiff(imagefilter2DKernel2, imageSVDKernel2, diff8);
+    minMaxLoc(diff8, &minVal8, &maxVal8);
+    cout << "maximum pixel error (kernel 2): " << maxVal8 << endl;
+
 	
+    waitKey(0);
 	
-	
-	
-	
-  cout << "Program finished successfully" << endl;
-  destroyAllWindows(); 
-  return 0;
+    cout << "Program finished successfully" << endl;
+    destroyAllWindows();
+    return 0;
 }
