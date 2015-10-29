@@ -204,8 +204,8 @@ int main(int argc, char** argv) {
 		const int dy = abs(k_width - y);
 		for (int x = 0; x < kernel2D.cols; ++x) {
             const int dx = abs(k_width - x);
-			//TODO: Fill kernel2D matrix with values of a gaussian
-            kernel2D(y,x) = (1/(2*M_PI*sigma*sigma))*exp(-((x*x+y*y)/(2*sigma*sigma)));
+            // Fill kernel2D matrix with values of a gaussian
+            kernel2D(y,x) = (1/(2*M_PI*sigma*sigma))*exp(-((dx*dx+dy*dy)/(2*sigma*sigma)));
         }
 	}
     cout << "kernel2D: "<< "("<< kernel2D.rows << ", " << kernel2D.cols <<")"<< kernel2D << endl;
@@ -222,15 +222,15 @@ int main(int argc, char** argv) {
 	tick = getTickCount();
 	// TODO: implement your solution here
 
-    Matx<float, 2*k_width+1, 1>kernelX = kernel2D.col( (((kernel2D.cols-1)/2)+1) );
+    Matx<float, 2*k_width+1, 1>kernelX = kernel2D.col(0);
 
-    Matx<float, 1, 2*k_width+1>kernelY = kernel2D.row( (((kernel2D.rows-1)/2)+1) );
+    Matx<float, 1, 2*k_width+1>kernelY = kernel2D.row(0);
 
     cout << "kernelX: "<< "("<< kernelX.rows << ", " << kernelX.cols <<")"<< kernelX << endl;
     cout << "kernelY: "<< "("<< kernelY.rows << ", " << kernelY.cols <<")"<< kernelY << endl;
 
 
-    sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelX, kernelY);
+    sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelY,kernelX);
     //filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
 
     cout << "<-------- fix is needed" << endl;
