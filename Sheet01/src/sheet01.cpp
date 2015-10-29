@@ -418,11 +418,20 @@ int main(int argc, char** argv) {
     imshow("Task8: filter2D kernel 2", imagefilter2DKernel2);
 
     //  ====(b)==================================================================	
-    Mat imageSVDKernel1;
+    Mat imageSVDKernel1, w1, u1, vt1;
     Mat imageSVDKernel2;
 
-    bonn_gray.copyTo(imageSVDKernel1);
+
+//    bonn_gray.copyTo(imageSVDKernel1);
+    bonn_gray.convertTo(imageSVDKernel1, CV_32F, 1.0/255);
+    SVD::compute(imageSVDKernel1, w1, u1, vt1);
+    cout << w1 << endl;
+    cout << u1 << endl;
+    cout << vt1 << endl;
+    sepFilter2D(bonn_gray, imageSVDKernel1, bonn_gray.depth(), u1, vt1);
     bonn_gray.copyTo(imageSVDKernel2);
+    
+    
 
     cout << "<-------- fix is needed" << endl;
 
