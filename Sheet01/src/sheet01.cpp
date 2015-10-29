@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
 
     Mat rectIntegral;
     integral(bonn_gray, rectIntegral, bonn_gray.depth());
+
     double meanIntegrals;
     for (size_t n = 0; n < 10; ++n) {
         meanIntegrals = 0.0;
@@ -95,30 +96,18 @@ int main(int argc, char** argv) {
             // .....D-------C
             //      |       |
             // .....B-------A
-/*
-            cout << "Values: " << rectIntegral.at<uchar>(r.br());
-            cout << "        " << rectIntegral.at<uchar>(Point(r.tl().x,r.tl().y + r.height));
-            cout << "        " << rectIntegral.at<uchar>(Point(r.tl().x + r.width, r.tl().y));
-            cout << "        " << rectIntegral.at<uchar>(r.tl());
-            cout << endl;
-*/
 
-            meanIntegrals +=  0.25*( rectIntegral.at<uchar>(r.br())                           // A
-                                - rectIntegral.at<uchar>(Point(r.tl().x,r.tl().y + r.height)) // B
-                                - rectIntegral.at<uchar>(Point(r.tl().x + r.width, r.tl().y)) // C
-                                + rectIntegral.at<uchar>(r.tl())                              // D
-                                );
 
-//            cout << "meanIntegrals " << meanIntegrals << endl;
-
+            meanIntegrals +=  ((double)( rectIntegral.at<int>(r.br())                         // A
+                                - rectIntegral.at<int>(Point(r.tl().x, r.tl().y + r.height))  // B
+                                - rectIntegral.at<int>(Point(r.tl().x + r.width, r.tl().y))   // C
+                                + rectIntegral.at<int>(r.tl())                                // D
+                                )/(double)(r.height*r.width));
 
         }
     }
     // normalize
-    meanIntegrals /= (sizeof(rects)/sizeof(*rects));
-
-    cout << "<-------- fix is needed" << endl;
-
+    meanIntegrals /= (double)(sizeof(rects)/(double)sizeof(*rects));
 
     tock = getTickCount();
     cout << "computing an integral image gives " << meanIntegrals << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
@@ -127,6 +116,8 @@ int main(int argc, char** argv) {
 	//====(d)==== integral image method - custom implementation====
 	//TODO: implement your solution here
 	// ...
+    cout << "<-------- fix is needed" << endl;
+
 
     waitKey(0); // waits until the user presses a button and then continues with task 2 -> uncomment this
     destroyAllWindows(); // closes all open windows -> uncomment this
@@ -208,7 +199,7 @@ int main(int argc, char** argv) {
 	// Compute gaussian kernel manually
 	const int k_width = 3.5 * sigma;
 	tick = getTickCount();
-	Matx<float, 2*k_width+1, 2*k_width+1> kernel2D;
+    Matx<float, 2*k_width+1, 2*k_width+1> kernel2D;
 	for (int y = 0; y < kernel2D.rows; ++y) {
 		const int dy = abs(k_width - y);
 		for (int x = 0; x < kernel2D.cols; ++x) {
@@ -217,7 +208,7 @@ int main(int argc, char** argv) {
             kernel2D(y,x) = (1/(2*M_PI*sigma*sigma))*exp(-((x*x+y*y)/(2*sigma*sigma)));
         }
 	}
-    //cout << "kernel2D: "<< kernel2D << endl;
+    cout << "kernel2D: "<< "("<< kernel2D.rows << ", " << kernel2D.cols <<")"<< kernel2D << endl;
 
 	kernel2D *= 1. / sum(kernel2D)[0];
 
@@ -230,8 +221,17 @@ int main(int argc, char** argv) {
     //  ====(c)==== 2D Filtering - using opencv "sepFilter2D()" ====
 	tick = getTickCount();
 	// TODO: implement your solution here
-  //  sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D, kernel2D);
-        filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
+
+    Matx<float, 2*k_width+1, 1>kernelX = kernel2D.col( (((kernel2D.cols-1)/2)+1) );
+
+    Matx<float, 1, 2*k_width+1>kernelY = kernel2D.row( (((kernel2D.rows-1)/2)+1) );
+
+    cout << "kernelX: "<< "("<< kernelX.rows << ", " << kernelX.cols <<")"<< kernelX << endl;
+    cout << "kernelY: "<< "("<< kernelY.rows << ", " << kernelY.cols <<")"<< kernelY << endl;
+
+
+    sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelX, kernelY);
+    //filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
 
     cout << "<-------- fix is needed" << endl;
 
@@ -239,14 +239,9 @@ int main(int argc, char** argv) {
 	cout << "OpenCV sepFilter2D() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
     // Show result images
-    namedWindow("Task4: (a) grayimage", WINDOW_AUTOSIZE);
-    imshow("Task4: (a) grayimage", bonn_gray);
-
-    namedWindow("Task4: (a) GaussianBlur", WINDOW_AUTOSIZE);
+    imshow("Task4: grayimage", bonn_gray);
     imshow("Task4: (a) GaussianBlur", img_gb);
-    namedWindow("Task4: (b) filter2D", WINDOW_AUTOSIZE);
     imshow("Task4: (b) filter2D", img_f2D);
-    namedWindow("Task4: (c) sepFilter2D", WINDOW_AUTOSIZE);
     imshow("Task4: (c) sepFilter2D", img_sepF2D);
 
 	// compare blurring methods
