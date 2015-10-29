@@ -120,15 +120,17 @@ int main(int argc, char** argv) {
     tick = getTickCount();
     
     //initalize a new matrix for computing the integral matrix
-    Mat integralImage = Mat::zeros(bonn_gray.size().height, bonn_gray.size().width, bonn_gray.type());
+    //Mat integralImage = Mat::zeros(bonn_gray.size().height, bonn_gray.size().width, bonn_gray.type());
+    Mat integralImage;
     //iterate through the original gray image
-    for (int i = 0; i < bonn_gray.size().width - 1; i++) {
-        for (int j = 0; j < bonn_gray.size().height - 1; j++) {
+    /*
+    for (int i = 0; i < bonn_gray.size().width -1; i++) {
+        for (int j = 0; j < bonn_gray.size().height -1; j++) {
             //sum up all four pixel (self, tl, t, l)
             //catch the border pixel if a pixel is outside the image
-            integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point (i, j));
+            //integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point (i, j));
             if (i != 0 && j != 0) {
-                integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point(i - 1, j - 1));
+                integralImage.at<uchar>(Point(i, j)) -= bonn_gray.at<uchar>(Point(i - 1, j - 1));
             }            
             if (i != 0) {
                 integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point(i - 1, j));
@@ -138,6 +140,35 @@ int main(int argc, char** argv) {
             }
         }        
     }
+    */
+
+    integralImage = Mat::zeros(bonn_gray.rows+1, bonn_gray.cols+1, bonn_gray.type());
+   // integralImage.row(0) =  Mat::zeros(integralImage.rows, 1, integralImage.type());
+   //integralImage.col(0) =  Mat::zeros(1, integralImage.cols, integralImage.type());
+    for (int i=0; i < integralImage.rows; ++i) {
+        for (int j=0;  j < integralImage.cols; ++j) {
+            if (i != 0 && j != 0)
+                integralImage.at<uchar>(i,j) = bonn_gray.at<uchar>(i-1, j-1);
+
+            if (i == 0)
+                integralImage.at<uchar>(i,j) = 0;
+            else
+                integralImage.at<uchar>(i,j) += integralImage.at<uchar>(i-1, j);
+            if (j == 0)
+                integralImage.at<uchar>(i,j) = 0;
+            else
+                integralImage.at<uchar>(i,j) += integralImage.at<uchar>(i  , j-1);
+            if (i != 0 && j != 0)
+                integralImage.at<uchar>(i,j) -= integralImage.at<uchar>(i-1, j-1);
+
+        }
+    }
+
+    cout << "bonn_gray: "<< "("<< bonn_gray.rows << ", " << bonn_gray.cols <<")"<< endl << bonn_gray(Rect(0,0,5,5)) << endl;
+    cout << "rectIntegral: "<< "("<< rectIntegral.rows << ", " << rectIntegral.cols <<")"<< endl << rectIntegral(Rect(0,0,5,5)) << endl;
+    cout << "integralImage: "<< "("<< integralImage.rows << ", " << integralImage.cols <<")"<< endl << integralImage(Rect(0,0,5,5)) << endl;
+
+
     
     //The same like task c)
     
@@ -281,7 +312,7 @@ int main(int argc, char** argv) {
     cout << "kernelY: "<< "("<< kernelY.rows << ", " << kernelY.cols <<")"<< kernelY << endl;
 
 
-    sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelY,kernelX);
+    sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelX.t(), kernelY.t());
     //filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
 
     cout << "<-------- fix is needed" << endl;
@@ -297,7 +328,6 @@ int main(int argc, char** argv) {
 
 	// compare blurring methods
     // Compute absolute differences between pixel intensities of (a), (b) and (c) using "absdiff"
-    Mat diff0;
     Mat diff1;
     Mat diff2;
     Mat diff3;
@@ -306,12 +336,14 @@ int main(int argc, char** argv) {
     absdiff(img_gb, img_sepF2D, diff2);
     absdiff(img_f2D, img_sepF2D, diff3);
 
-    diff0 = 0.333*(diff1 + diff2 + diff3);
-
-    // TODO: Find the maximum pixel error using "minMaxLoc"
+    // Find the maximum pixel error using "minMaxLoc"
     double minVal2, maxVal2;
-    minMaxLoc(diff0, &minVal2, &maxVal2);
-    cout << "maximum pixel error: " << maxVal2 << endl;
+    minMaxLoc(diff1, &minVal2, &maxVal2);
+    cout << "maximum pixel error (img_gb vs. img_f2D): " << maxVal2 << endl;
+    minMaxLoc(diff2, &minVal2, &maxVal2);
+    cout << "maximum pixel error (img_gb vs. img_sepF2D): " << maxVal2 << endl;
+    minMaxLoc(diff3, &minVal2, &maxVal2);
+    cout << "maximum pixel error (img_f2D vs. img_sepF2D): " << maxVal2 << endl;
 
 
     waitKey(0);
