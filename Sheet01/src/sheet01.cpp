@@ -306,12 +306,17 @@ int main(int argc, char** argv) {
     absdiff(img_gb, img_sepF2D, diff2);
     absdiff(img_f2D, img_sepF2D, diff3);
 
-    diff0 = 0.333*(diff1 + diff2 + diff3);
+    //diff0 = 0.333*(diff1 + diff2 + diff3);
 
     // TODO: Find the maximum pixel error using "minMaxLoc"
     double minVal2, maxVal2;
-    minMaxLoc(diff0, &minVal2, &maxVal2);
+    minMaxLoc(diff1, &minVal2, &maxVal2);
     cout << "maximum pixel error: " << maxVal2 << endl;
+    minMaxLoc(diff2, &minVal2, &maxVal2);
+    cout << "maximum pixel error: " << maxVal2 << endl;
+    minMaxLoc(diff3, &minVal2, &maxVal2);
+    cout << "maximum pixel error: " << maxVal2 << endl;
+
 
 
     waitKey(0);
