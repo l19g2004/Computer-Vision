@@ -116,8 +116,58 @@ int main(int argc, char** argv) {
 	//====(d)==== integral image method - custom implementation====
 	//TODO: implement your solution here
 	// ...
-    cout << "<-------- fix is needed" << endl;
+        
+    tick = getTickCount();
+    
+    //initalize a new matrix for computing the integral matrix
+    Mat integralImage = Mat::zeros(bonn_gray.size().height, bonn_gray.size().width, bonn_gray.type());
+    //iterate through the original gray image
+    for (int i = 0; i < bonn_gray.size().width - 1; i++) {
+        for (int j = 0; j < bonn_gray.size().height - 1; j++) {
+            //sum up all four pixel (self, tl, t, l)
+            //catch the border pixel if a pixel is outside the image
+            integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point (i, j));
+            if (i != 0 && j != 0) {
+                integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point(i - 1, j - 1));
+            }            
+            if (i != 0) {
+                integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point(i - 1, j));
+            }
+            if (j != 0) {
+                integralImage.at<uchar>(Point(i, j)) += bonn_gray.at<uchar>(Point(i, j - 1));
+            }
+        }        
+    }
+    
+    //The same like task c)
+    
+    //double meanIntegrals;
+    for (size_t n = 0; n < 10; ++n) {
+        meanIntegrals = 0.0;
+        for (auto& r : rects) {
+            //cout << "Point " << r.tl() << " - " << r.br() << " : " << r.width << " , "<< r.height << endl;
 
+
+            //      .       .
+            //      .       .
+            // .....D-------C
+            //      |       |
+            // .....B-------A
+
+
+            meanIntegrals +=  ((double)( integralImage.at<int>(r.br())                         // A
+                                - integralImage.at<int>(Point(r.tl().x, r.tl().y + r.height))  // B
+                                - integralImage.at<int>(Point(r.tl().x + r.width, r.tl().y))   // C
+                                + integralImage.at<int>(r.tl())                                // D
+                                )/(double)(r.height*r.width));
+
+        }
+    }
+    // normalize
+    meanIntegrals /= (double)(sizeof(rects)/(double)sizeof(*rects));
+
+    tock = getTickCount();
+    cout << "computing an integral image gives " << meanIntegrals << " computed in " << (tock-tick)/getTickFrequency() << " seconds." << endl;
 
     waitKey(0); // waits until the user presses a button and then continues with task 2 -> uncomment this
     destroyAllWindows(); // closes all open windows -> uncomment this
@@ -158,6 +208,7 @@ int main(int argc, char** argv) {
     }
 	
     // Show the results of (a) and (b)
+    imshow("original", bonn_gray);
     namedWindow("Task2: (a) with equalizeHist", WINDOW_AUTOSIZE);
     imshow("Task2: (a) with equalizeHist", ocvHistEqualization);
     namedWindow("Task2: (b) without equalizeHist", WINDOW_AUTOSIZE);
