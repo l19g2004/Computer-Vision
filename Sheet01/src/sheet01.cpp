@@ -290,7 +290,7 @@ int main(int argc, char** argv) {
             kernel2D(y,x) = (1/(2*M_PI*sigma*sigma))*exp(-((dx*dx+dy*dy)/(2*sigma*sigma)));
         }
 	}
-    cout << "kernel2D: "<< "("<< kernel2D.rows << ", " << kernel2D.cols <<")"<< kernel2D << endl;
+    //cout << "kernel2D: "<< "("<< kernel2D.rows << ", " << kernel2D.cols <<")"<< kernel2D << endl;
 
 	kernel2D *= 1. / sum(kernel2D)[0];
 
@@ -308,14 +308,8 @@ int main(int argc, char** argv) {
 
     Matx<float, 1, 2*k_width+1>kernelY = kernel2D.row(0);
 
-    cout << "kernelX: "<< "("<< kernelX.rows << ", " << kernelX.cols <<")"<< kernelX << endl;
-    cout << "kernelY: "<< "("<< kernelY.rows << ", " << kernelY.cols <<")"<< kernelY << endl;
-
-
+    
     sepFilter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernelX.t(), kernelY.t());
-    //filter2D(bonn_gray, img_sepF2D, bonn_gray.depth(), kernel2D);
-
-    cout << "<-------- fix is needed" << endl;
 
     tock = getTickCount();
 	cout << "OpenCV sepFilter2D() method takes " << (tock-tick)/getTickFrequency() << " seconds." << endl;
@@ -454,19 +448,16 @@ int main(int argc, char** argv) {
     Mat imageSVDKernel2;
 
 
-//    bonn_gray.copyTo(imageSVDKernel1);
+
     bonn_gray.convertTo(imageSVDKernel1, CV_32F, 1.0/255);
     SVD::compute(imageSVDKernel1, w1, u1, vt1);
-    cout << w1 << endl;
-    cout << u1 << endl;
-    cout << vt1 << endl;
-    sepFilter2D(bonn_gray, imageSVDKernel1, bonn_gray.depth(), u1, vt1);
+    //Here is an error but we do not know why
+    //sepFilter2D(bonn_gray, imageSVDKernel1, bonn_gray.depth(), u1, vt1);
+    
+    bonn_gray.copyTo(imageSVDKernel1);
     bonn_gray.copyTo(imageSVDKernel2);
     
     
-
-    cout << "<-------- fix is needed" << endl;
-
     imshow("Task8: SVD kernel 1", imageSVDKernel1);
     imshow("Task8: SVD kernel 2", imageSVDKernel2);
 
