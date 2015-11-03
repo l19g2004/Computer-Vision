@@ -4,6 +4,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 
+using namespace std;
+using namespace cv;
+
 void part1();
 void part2();
 void part3();
@@ -25,7 +28,7 @@ int main(int argc, char* argv[])
     // Uncomment the part of the exercise that you wish to implement.
     // For the final submission all implemented parts should be uncommented.
 
-    //part1();
+    part1();
     //part2();
     //part3();
     //part4();
@@ -59,7 +62,7 @@ void part1()
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
 
     // read the image file
-    cv::Mat im_Traffic_BGR = cv::imread("./images/traffic.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_Traffic_BGR = cv::imread("../images/traffic.jpg", cv::IMREAD_COLOR);
     // gray version of bonn.png
     cv::Mat                      im_Traffic_Gray;
     cv::cvtColor(im_Traffic_BGR, im_Traffic_Gray, CV_BGR2GRAY);
@@ -68,7 +71,7 @@ void part1()
     std::vector<cv::Mat>   gpyr;    // this will hold the Gaussian Pyramid created with OpenCV
     std::vector<cv::Mat> myGpyr;    // this will hold the Gaussian Pyramid created with your custom way
 
-    // Please implement the pyramids as described in the exercise sheet, using the containers given above.
+    imshow("Task1: traffic.jpg", im_Traffic_BGR);
 
     // Perform the computations asked in the exercise sheet and show them using **std::cout**
 
@@ -76,9 +79,44 @@ void part1()
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
 
+    Mat tmp;
+
+    // Gaussian Pyramid created with OpenCV
+    im_Traffic_BGR.copyTo(tmp);
+    while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
+        cv::pyrDown( tmp, tmp, Size( (tmp.cols+1)*0.5, (tmp.rows+1)*0.5 ) );
+        gpyr.push_back(tmp);
+    }
+
+    // Gaussian Pyramid created with your custom way
+    im_Traffic_BGR.copyTo(tmp);
+  //  while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
+  //      myGpyr.push_back(tmp);
+  //  }
+/*
+    std::cout << "Gaussian Pyramid created with OpenCV: " << std::endl;
+    for(std::vector<Mat>::iterator it = gpyr.begin(); it != gpyr.end(); ++it) {
+        imshow("Task1: Gaussian Pyramid (OpenCV)", *it);
+        std::cout << "Image size (OpenCV): " << (*it).rows << ", " << (*it).cols << std::endl;
+        cv::waitKey(0);
+    }
+*/
+    std::cout << "Gaussian Pyramid created with custom way: " << std::endl;
+    for(std::vector<Mat>::iterator it = myGpyr.begin(); it != myGpyr.end(); ++it) {
+        imshow("Task1: Gaussian Pyramid (custom Way)", *it);
+        std::cout << "Image size (custom Way): " << (*it).rows << ", " << (*it).cols << std::endl;
+        cv::waitKey(0);
+    }
+
+
+
+
     // For the laplacian pyramid you should define your own container.
     // If needed perform normalization of the image to be displayed
 
+
+
+   // cv::waitKey(0); // waits until the user presses a button
     cv::destroyAllWindows();
 }
 
