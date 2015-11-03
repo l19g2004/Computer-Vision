@@ -71,6 +71,9 @@ void part1()
     std::vector<cv::Mat>   gpyr;    // this will hold the Gaussian Pyramid created with OpenCV
     std::vector<cv::Mat> myGpyr;    // this will hold the Gaussian Pyramid created with your custom way
 
+    std::vector<cv::Mat> myLapyr;    // this will hold the Laplacian Pyramid
+
+
     imshow("Task1: traffic.jpg", im_Traffic_BGR);
 
     // Perform the computations asked in the exercise sheet and show them using **std::cout**
@@ -89,24 +92,35 @@ void part1()
     }
 
     // Gaussian Pyramid created with your custom way
-    im_Traffic_BGR.copyTo(tmp);
-  //  while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
-  //      myGpyr.push_back(tmp);
-  //  }
-/*
-    std::cout << "Gaussian Pyramid created with OpenCV: " << std::endl;
-    for(std::vector<Mat>::iterator it = gpyr.begin(); it != gpyr.end(); ++it) {
-        imshow("Task1: Gaussian Pyramid (OpenCV)", *it);
-        std::cout << "Image size (OpenCV): " << (*it).rows << ", " << (*it).cols << std::endl;
-        cv::waitKey(0);
+    im_Traffic_BGR.copyTo(tmp);    
+    while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
+        GaussianBlur(tmp, tmp, Size(5,5), 1.5);
+        resize(tmp, tmp, Size((tmp.cols+1)*0.5, (tmp.rows+1)*0.5));
+        myGpyr.push_back(tmp);
     }
-*/
-    std::cout << "Gaussian Pyramid created with custom way: " << std::endl;
-    for(std::vector<Mat>::iterator it = myGpyr.begin(); it != myGpyr.end(); ++it) {
-        imshow("Task1: Gaussian Pyramid (custom Way)", *it);
-        std::cout << "Image size (custom Way): " << (*it).rows << ", " << (*it).cols << std::endl;
-        cv::waitKey(0);
+
+
+
+    if(gpyr.size() == myGpyr.size()){
+        for(std::vector<Mat>::size_type i = 0; i != gpyr.size(); i++) {
+
+            //equalizeHist( src, dst );
+            myLapyr.push_back(gpyr[i] - myGpyr[i]);
+
+            imshow("Task1: Laplacian Pyramid", myLapyr[i]);
+
+            imshow("Task1: Gaussian Pyramid (OpenCV)", gpyr[i]);
+            std::cout << "Image size (OpenCV): " << gpyr[i].rows << ", " << gpyr[i].cols << std::endl;
+
+            imshow("Task1: Gaussian Pyramid (custom Way)", myGpyr[i]);
+            std::cout << "Image size (custom Way): " << myGpyr[i].rows << ", " << myGpyr[i].cols << std::endl;
+
+            cv::waitKey(0);
+        }
+    } else {
+        std::cout << "OpenCV Pyramid and custom way are different" << std::endl;
     }
+
 
 
 
