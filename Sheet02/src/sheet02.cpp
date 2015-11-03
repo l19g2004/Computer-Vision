@@ -105,6 +105,8 @@ void part1()
         for(std::vector<Mat>::size_type i = 0; i != gpyr.size(); i++) {
 
             //equalizeHist( src, dst );
+            std::cout << "<---------------------- normalization here " << std::endl;
+
             myLapyr.push_back(gpyr[i] - myGpyr[i]);
 
             imshow("Task1: Laplacian Pyramid", myLapyr[i]);
@@ -122,6 +124,7 @@ void part1()
     }
 
 
+    std::cout << "<---------------------- difference here " << std::endl;
 
 
 
