@@ -99,13 +99,13 @@ void part1()
         myGpyr.push_back(tmp);
     }
 
+    Mat diff;
+    double minVal, maxVal;
+
 
 
     if(gpyr.size() == myGpyr.size()){
         for(std::vector<Mat>::size_type i = 0; i != gpyr.size(); i++) {
-
-            //equalizeHist( src, dst );
-            std::cout << "<---------------------- normalization here " << std::endl;
 
             myLapyr.push_back(gpyr[i] - myGpyr[i]);
 
@@ -117,14 +117,19 @@ void part1()
             imshow("Task1: Gaussian Pyramid (custom Way)", myGpyr[i]);
             std::cout << "Image size (custom Way): " << myGpyr[i].rows << ", " << myGpyr[i].cols << std::endl;
 
+            diff.zeros(diff.rows,diff.cols,diff.type());
+            absdiff(gpyr[i], myGpyr[i], diff);
+            minMaxLoc(diff, &minVal, &maxVal);
+            cout << "maximum pixel error: " << maxVal << endl;
+            minVal = 0;
+            maxVal = 0;
+            diff.zeros(diff.rows,diff.cols,diff.type());
+
             cv::waitKey(0);
         }
     } else {
         std::cout << "OpenCV Pyramid and custom way are different" << std::endl;
     }
-
-
-    std::cout << "<---------------------- difference here " << std::endl;
 
 
 
