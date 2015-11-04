@@ -28,10 +28,10 @@ int main(int argc, char* argv[])
     // Uncomment the part of the exercise that you wish to implement.
     // For the final submission all implemented parts should be uncommented.
 
-    part1();
+    //part1();
     //part2();
     //part3();
-    //part4();
+    part4();
     //part5();
 
     std::cout <<                                                            std::endl;
@@ -231,17 +231,23 @@ void part4()
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
 
-    cv::Mat im_Traffic_BGR = cv::imread("./images/traffic.jpg");
+    cv::Mat im_Traffic_BGR = cv::imread("../images/traffic.jpg");
     // BGR to Gray
     cv::Mat                       im_Traffic_Gray;
     cv::cvtColor( im_Traffic_BGR, im_Traffic_Gray, cv::COLOR_BGR2GRAY );
+    cv::Mat im_Traffic_Edges;
+
+    blur(im_Traffic_Gray, im_Traffic_Gray, Size(3,3));
 
     // Perform edge detection as described in the exercise sheet
+    cv::Canny(im_Traffic_Gray, im_Traffic_Edges, 120.0, 200.0, 3);
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    imshow("Task 4: gray image", im_Traffic_Gray);
+    imshow("Task 4: edge image", im_Traffic_Edges);
+    cv::waitKey(0); // waits until the user presses a button
     cv::destroyAllWindows();
 }
 
