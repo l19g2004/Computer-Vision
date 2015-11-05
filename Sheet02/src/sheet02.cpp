@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
 
     //part1();
     //part2();
-    //part3();
-    part4();
+    part3();
+    //part4();
     //part5();
 
     std::cout <<                                                            std::endl;
@@ -194,7 +194,7 @@ void part3()
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
 
-    cv::Mat           im_Traffic_BGR = cv::imread("./images/traffic.jpg"); // traffic.jpg // circles.png
+    cv::Mat           im_Traffic_BGR = cv::imread("../images/traffic.jpg"); // traffic.jpg // circles.png
     // Blur to denoise
     cv::GaussianBlur( im_Traffic_BGR, im_Traffic_BGR, cv::Size(3,3), 0, 0, cv::BORDER_DEFAULT );
     // BGR to Gray
@@ -202,16 +202,31 @@ void part3()
     cv::cvtColor(     im_Traffic_BGR, im_Traffic_Gray, cv::COLOR_BGR2GRAY ); // cv::COLOR_BGR2GRAY // CV_BGR2GRAY
 
     // Perform the computations asked in the exercise sheet
+    cv::Mat im_Traffic_Sobel;
+
+    int ddepth = 0;
+    int dx = 1;
+    int dy = 1;
+    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel, im_Traffic_BGR.depth(), dx, dy, 3);
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
+    imshow("Task3: gray image", im_Traffic_Gray);
+    imshow("Task3: sobel image", im_Traffic_Sobel);
+
 
     // Use the function **drawArrow** provided at the end of this file in order to
+    // drawArrow(cv::Mat &image, cv::Point p, cv::Scalar color, double scaleMagnitude, double scaleArrowHead, double magnitube, double orientationDegrees);
+
+
+
     // draw Vectors showing the Gradient Magnitude and Orientation
     // (to avoid clutter, draw every 10nth gradient,
     // only if the magnitude is above a threshold)
 
+
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
@@ -247,6 +262,7 @@ void part4()
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     imshow("Task 4: gray image", im_Traffic_Gray);
     imshow("Task 4: edge image", im_Traffic_Edges);
+
     cv::waitKey(0); // waits until the user presses a button
     cv::destroyAllWindows();
 }
@@ -269,24 +285,35 @@ void part5()
     std::cout <<                                                            std::endl;
 
     // Read image, Blur to denoise
-    cv::Mat                           im_Traffic_BGR = cv::imread("./images/traffic.jpg");
+    cv::Mat                           im_Traffic_BGR = cv::imread("../images/traffic.jpg");
     cv::GaussianBlur( im_Traffic_BGR, im_Traffic_BGR,  cv::Size(3,3), 0, 0, cv::BORDER_DEFAULT );
     // BGR to Gray
     cv::Mat                           im_Traffic_Gray;
     cv::cvtColor(     im_Traffic_BGR, im_Traffic_Gray, cv::COLOR_BGR2GRAY );
 
     // Read Template
-    cv::Mat im_Sign_BGR = cv::imread("./images/sign.png");
+    cv::Mat im_Sign_BGR = cv::imread("../images/sign.png");
     cv::Mat im_Sign_Gray;
     // BGR to Gray
     cv::cvtColor( im_Sign_BGR, im_Sign_Gray, cv::COLOR_BGR2GRAY ); // cv::COLOR_BGR2GRAY // CV_BGR2GRAY
 
     // Perform the steps described in the exercise sheet
+    cv::Mat im_Traffic_Edges;
+
+    // canny edge detector
+    cv::Canny(im_Traffic_Gray, im_Traffic_Edges, 120.0, 200.0, 3);
+
+
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     // If needed perform normalization of the image to be displayed
+
+    imshow("Task 5: gray image", im_Traffic_Gray);
+    imshow("Task 5: edge image", im_Traffic_Edges);
+
+    cv::waitKey(0); // waits until the user presses a button
 
     cv::destroyAllWindows();
 }
