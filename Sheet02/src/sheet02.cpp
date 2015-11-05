@@ -30,9 +30,9 @@ int main(int argc, char* argv[])
 
     //part1();
     //part2();
-    part3();
+    //part3();
     //part4();
-    //part5();
+    part5();
 
     std::cout <<                                                            std::endl;
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
@@ -342,15 +342,87 @@ void part5()
 
     // Read Template
     cv::Mat im_Sign_BGR = cv::imread("../images/sign.png");
+    // Rescale the template to the size of the two largest traffic signs in the image.
+    resize(im_Sign_BGR, im_Sign_BGR, Size(80,80));
+
     cv::Mat im_Sign_Gray;
     // BGR to Gray
     cv::cvtColor( im_Sign_BGR, im_Sign_Gray, cv::COLOR_BGR2GRAY ); // cv::COLOR_BGR2GRAY // CV_BGR2GRAY
 
     // Perform the steps described in the exercise sheet
     cv::Mat im_Traffic_Edges;
+    cv::Mat im_Sign_Edges;
 
     // canny edge detector
-    cv::Canny(im_Traffic_Gray, im_Traffic_Edges, 120.0, 200.0, 3);
+    cv::Canny(im_Traffic_Gray, im_Traffic_Edges, 120.0, 200.0, 5);
+    cv::Canny(im_Sign_Gray, im_Sign_Edges, 120.0, 200.0, 5);
+
+
+    // invert edges to get right distance transform
+    bitwise_not ( im_Traffic_Edges, im_Traffic_Edges );
+
+    // distance Transform
+    cv::Mat im_Traffic_Distances;
+    cv::distanceTransform(im_Traffic_Edges, im_Traffic_Distances, CV_DIST_L2 , 3);
+    normalize(im_Traffic_Distances, im_Traffic_Distances, 0, 1., NORM_MINMAX);
+
+
+    Mat detectionSign;
+    im_Traffic_Gray.copyTo(detectionSign);
+
+    Mat distancesToSign = Mat(im_Traffic_Gray.rows, im_Traffic_Gray.cols, CV_32FC1);
+
+  //  Mat integralImage;
+   // integralImage = Mat::zeros(bonn_gray.rows+1, bonn_gray.cols+1, 4);
+     //iterate through the original gray image
+
+    normalize(im_Sign_Edges, im_Sign_Edges, 0, 1., NORM_MINMAX);
+    im_Sign_Edges.convertTo(im_Sign_Edges, CV_32FC1);
+
+    float templateSum;
+
+    cout << "type1 : "<< im_Traffic_Distances(Rect(0,0,80,80)).type() << endl;
+    cout << "type2 : "<< im_Sign_Edges.type() << endl;
+    cout << "type3 : "<< distancesToSign.type() << endl;
+
+    for (int i=0; i < im_Traffic_Distances.rows; ++i) {
+        for (int j=0;  j < im_Traffic_Distances.cols; ++j) {
+
+                templateSum = 0.;
+                if( ((i + im_Sign_Edges.rows) < im_Traffic_Distances.rows) && ((j + im_Sign_Edges.cols) < im_Traffic_Distances.cols) )
+                    distancesToSign.at<Scalar>(i,j) = sum(im_Traffic_Distances(Rect(j,i,im_Sign_Edges.rows,im_Sign_Edges.cols)) * im_Sign_Edges);
+
+
+                /*
+
+                if( ((i + im_Sign_Edges.rows) < im_Traffic_Gray.rows) && ((j + im_Sign_Edges.cols) < im_Traffic_Gray.cols) ) {
+
+
+                for (int t=0; t < im_Sign_Edges.rows; ++t) {
+                    for (int k=0;  k < im_Sign_Edges.cols; ++k) {
+
+                            if(im_Sign_Edges.at<uchar>(t,k) > 0)
+                                templateSum += im_Traffic_Distances.at<float>(i+t,j+k);
+
+                    }
+                }
+
+                distancesToSign.at<float>(i,j) = templateSum;
+                }
+                */
+        }
+    }
+
+    cout << im_Sign_Edges(Rect(10,10,20,20)) << endl;
+
+imshow("Task 5: BVlaa", distancesToSign);
+cout << distancesToSign(Rect(10,10,20,20)) << endl;
+
+
+   // cout << im_Traffic_Edges(Rect(10,10,20,20)) << endl;
+
+  //  cout << im_Traffic_Distances(Rect(10,10,20,20)) << endl;
+
 
 
 
@@ -360,7 +432,11 @@ void part5()
     // If needed perform normalization of the image to be displayed
 
     imshow("Task 5: gray image", im_Traffic_Gray);
-    imshow("Task 5: edge image", im_Traffic_Edges);
+   // imshow("Task 5: edge image", im_Traffic_Edges);
+    imshow("Task 5: distance Transform", im_Traffic_Distances);
+    imshow("Task 5: sign", im_Sign_Edges);
+    imshow("Task 5: detection Sign", detectionSign);
+
 
     cv::waitKey(0); // waits until the user presses a button
 
