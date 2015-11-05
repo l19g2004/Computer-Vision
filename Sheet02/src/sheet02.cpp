@@ -208,37 +208,58 @@ void part3()
     Mat abs_grad_x, abs_grad_y;
     Mat grad;
 
-    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_x, im_Traffic_BGR.depth(), 1, 0, 3);
-    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_y, im_Traffic_BGR.depth(), 0, 1, 3);
-    convertScaleAbs( im_Traffic_Sobel_x, abs_grad_x );
-    convertScaleAbs( im_Traffic_Sobel_y, abs_grad_y );
-    addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
+    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_x, im_Traffic_Gray.depth(), 1, 0, 3);
+    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_y, im_Traffic_Gray.depth(), 0, 1, 3);
+   // convertScaleAbs( im_Traffic_Sobel_x, abs_grad_x );
+   // convertScaleAbs( im_Traffic_Sobel_y, abs_grad_y );
+   // addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
 
-    Mat orientation = Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F); //to store the gradients
-    Mat img=Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F);//to draw out the map
-    img = cv::Scalar(255,255,255);//all white
-
-
-    for(int i = 0; i < abs_grad_x.rows; i++){
-       for(int j = 0; j < abs_grad_x.cols; j++){
-           // Store in orientation matrix element
-           orientation.at<float>(i,j) = fastAtan2(abs_grad_x.at<float>(i,j), abs_grad_y.at<float>(i,j));
-
-       }
-    }
+   // Mat orientation = Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F); //to store the gradients
 
     Mat im_Traffic_Orientations;
     im_Traffic_Gray.copyTo(im_Traffic_Orientations);
- //   drawArrow(im_Traffic_Orientations, cv::Point p, cv::Scalar(255,255,255), 1., double scaleArrowHead, double magnitube, double orientationDegrees);
+
+    double gradient;
+    double edgeStrength;
+
+    for(int i = 0; i < im_Traffic_Gray.rows; i++){
+       for(int j = 0; j < im_Traffic_Gray.cols; j++){
+
+           // Store in orientation matrix element
+            //gradient = fastAtan2(abs_grad_x.at<double>(i,j), abs_grad_y.at<double>(i,j)) * 180 / M_PI;
+            gradient = fastAtan2(im_Traffic_Sobel_x.at<int>(i,j), im_Traffic_Sobel_y.at<int>(i,j)) * 180 / M_PI;
+
+            edgeStrength = sqrt( (im_Traffic_Sobel_x.at<int>(i,j)*im_Traffic_Sobel_x.at<int>(i,j) + im_Traffic_Sobel_y.at<int>(i,j)*im_Traffic_Sobel_y.at<int>(i,j)) );
+
+            edgeStrength /= 45000;
+
+            //cout << edgeStrength << endl;
+            if(edgeStrength > 1)
+                drawArrow(im_Traffic_Orientations, Point(j,i), cv::Scalar(255,255,255), 10., 5., edgeStrength, gradient);
+       }
+    }
+
+
+    cout << "im_Traffic_Sobel_x " << im_Traffic_Sobel_x.rows << ", " << im_Traffic_Sobel_x .cols << " - " << im_Traffic_Sobel_x.depth() << endl;
+    cout << "im_Traffic_Sobel_y " << im_Traffic_Sobel_y.rows << ", " << im_Traffic_Sobel_y .cols << " - " << im_Traffic_Sobel_y.depth()<< endl;
+    cout << "im_Traffic_Orientations " << im_Traffic_Orientations.rows << ", " << im_Traffic_Orientations .cols << " - " << im_Traffic_Orientations.depth()<< endl;
+
+  //  cout << im_Traffic_Sobel_y(Rect(10,10,20,20)) << endl;
+
+// cout << abs_grad_x(Rect(10,10,20,20)) << endl;
+
+   // drawArrow(im_Traffic_Orientations, Point(10,10), cv::Scalar(255,255,255), 1., 5., 50., 1);
+
+    //drawArrow(im_Traffic_Orientations, cv::Point p, cv::Scalar(255,255,255), 1., double scaleArrowHead, double magnitube, double orientationDegrees);
 
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-    imshow("Task3: gray image", im_Traffic_Gray);
+    imshow("Task3: gray image", im_Traffic_Orientations);
 
-    //imshow("Task3: sobel image x", abs_grad_x);
-    //imshow("Task3: sobel image y", abs_grad_y);
+    imshow("Task3: sobel image x", im_Traffic_Sobel_x);
+    imshow("Task3: sobel image y", im_Traffic_Sobel_y);
 
 
 
