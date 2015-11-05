@@ -202,18 +202,46 @@ void part3()
     cv::cvtColor(     im_Traffic_BGR, im_Traffic_Gray, cv::COLOR_BGR2GRAY ); // cv::COLOR_BGR2GRAY // CV_BGR2GRAY
 
     // Perform the computations asked in the exercise sheet
-    cv::Mat im_Traffic_Sobel;
+    cv::Mat im_Traffic_Sobel_x;
+    cv::Mat im_Traffic_Sobel_y;
+    /// Total Gradient (approximate)
+    Mat abs_grad_x, abs_grad_y;
+    Mat grad;
 
-    int ddepth = 0;
-    int dx = 1;
-    int dy = 1;
-    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel, im_Traffic_BGR.depth(), dx, dy, 3);
+    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_x, im_Traffic_BGR.depth(), 1, 0, 3);
+    cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_y, im_Traffic_BGR.depth(), 0, 1, 3);
+    convertScaleAbs( im_Traffic_Sobel_x, abs_grad_x );
+    convertScaleAbs( im_Traffic_Sobel_y, abs_grad_y );
+    addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
+
+    Mat orientation = Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F); //to store the gradients
+    Mat img=Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F);//to draw out the map
+    img = cv::Scalar(255,255,255);//all white
+
+
+    for(int i = 0; i < abs_grad_x.rows; i++){
+       for(int j = 0; j < abs_grad_x.cols; j++){
+           // Store in orientation matrix element
+           orientation.at<float>(i,j) = fastAtan2(abs_grad_x.at<float>(i,j), abs_grad_y.at<float>(i,j));
+
+       }
+    }
+
+    Mat im_Traffic_Orientations;
+    im_Traffic_Gray.copyTo(im_Traffic_Orientations);
+ //   drawArrow(im_Traffic_Orientations, cv::Point p, cv::Scalar(255,255,255), 1., double scaleArrowHead, double magnitube, double orientationDegrees);
+
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     imshow("Task3: gray image", im_Traffic_Gray);
-    imshow("Task3: sobel image", im_Traffic_Sobel);
+
+    //imshow("Task3: sobel image x", abs_grad_x);
+    //imshow("Task3: sobel image y", abs_grad_y);
+
+
+
 
 
     // Use the function **drawArrow** provided at the end of this file in order to
