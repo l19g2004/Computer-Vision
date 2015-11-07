@@ -29,10 +29,10 @@ int main(int argc, char* argv[])
     // For the final submission all implemented parts should be uncommented.
 
     //part1();
-    //part2();
+    part2();
     //part3();
     //part4();
-    part5();
+    //part5();
 
     std::cout <<                                                            std::endl;
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
@@ -161,15 +161,114 @@ void part2()
 
     // apple and orange are CV_32FC3
     cv::Mat im_Apple, im_Orange;
-    cv::imread("./images/apple.jpg",  cv::IMREAD_COLOR).convertTo(im_Apple,  CV_32FC3, (1./255.));
-    cv::imread("./images/orange.jpg", cv::IMREAD_COLOR).convertTo(im_Orange, CV_32FC3, (1./255.));
+    cv::imread("../images/apple.jpg",  cv::IMREAD_COLOR).convertTo(im_Apple,  CV_32FC3, (1./255.));
+    cv::imread("../images/orange.jpg", cv::IMREAD_COLOR).convertTo(im_Orange, CV_32FC3, (1./255.));
     cv::imshow("orange", im_Orange);
     cv::imshow("apple",  im_Apple );
     std::cout << "\n" << "Input images" << "   \t\t\t\t\t\t\t" << "Press any key..." << std::endl;
     cv::waitKey(0);
 
     // Perform the blending using a Laplacian Pyramid
-
+    
+    GaussianBlur(im_Apple, im_Apple, Size(5,5), 1.5);
+    GaussianBlur(im_Orange, im_Orange, Size(5,5), 1.5);
+    //Generate Gaussian pyramid for orange and apply image
+    std::vector<cv::Mat>   applepyr;
+    std::vector<cv::Mat>   orangepyr;
+    
+    Mat tmp;
+    im_Apple.copyTo(tmp);
+    applepyr.push_back(tmp);
+    while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
+        cv::pyrDown( tmp, tmp, Size( (tmp.cols+1)*0.5, (tmp.rows+1)*0.5 ) );
+        applepyr.push_back(tmp);
+    }
+    im_Orange.copyTo(tmp);
+    orangepyr.push_back(tmp);
+    while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
+        cv::pyrDown( tmp, tmp, Size( (tmp.cols+1)*0.5, (tmp.rows+1)*0.5 ) );
+        orangepyr.push_back(tmp);
+    }
+    
+    //Generate Laplacian pyramid for orange and apple gaussian pyramid
+    std::vector<cv::Mat> appleLapyr;
+    std::vector<cv::Mat> orangeLapyr;
+    Mat scaleUp;
+    Mat subLap;
+    for(std::vector<Mat>::size_type i = applepyr.size() - 1; i > 0; i--) {
+            Size picsize;
+            if (Size( (applepyr[i].cols)*2 - 1, (applepyr[i].rows)*2 - 1) == applepyr[i - 1].size()) {
+                picsize = Size( (applepyr[i].cols)*2 - 1, (applepyr[i].rows)*2 - 1);
+            } else {
+                picsize = Size( (applepyr[i].cols)*2, (applepyr[i].rows)*2);
+            }
+            cv::pyrUp(applepyr[i], scaleUp, picsize);
+            cv::subtract(applepyr[i - 1],scaleUp, subLap);
+            appleLapyr.push_back(subLap);
+    }
+    
+    for(std::vector<Mat>::size_type i = orangepyr.size() - 1; i > 0; i--) {
+            Size picsize;
+            if (Size( (orangepyr[i].cols)*2 - 1, (orangepyr[i].rows)*2 - 1) == orangepyr[i - 1].size()) {
+                picsize = Size( (orangepyr[i].cols)*2 - 1, (orangepyr[i].rows)*2 - 1);
+            } else {
+                picsize = Size( (orangepyr[i].cols)*2, (orangepyr[i].rows)*2);
+            }
+            cv::pyrUp(orangepyr[i], scaleUp, picsize);
+            cv::subtract(orangepyr[i - 1],scaleUp, subLap);
+            orangeLapyr.push_back(subLap);
+    }
+    
+    //Combine the half of the apple image with the half of the orange image 
+    std::vector<cv::Mat> combipyr;
+    std::vector<cv::Mat> combiLapyr;
+    Mat combi;
+    /*
+        Muss hier noch gewichtet werden?????????
+    */
+    for(std::vector<Mat>::size_type i = 0; i != orangeLapyr.size(); i++) {
+        combi = Mat(orangeLapyr[i].size(), orangeLapyr[i].type());
+        for (int j = 0; j < orangeLapyr[i].cols; j++) {
+            if (j < orangeLapyr[i].cols / 2) {
+                appleLapyr[i].col(j).copyTo(combi.col(j));
+            } else {
+                orangeLapyr[i].col(j).copyTo(combi.col(j));
+            }
+        }
+        combiLapyr.push_back(combi);
+    }
+    
+    for(std::vector<Mat>::size_type i = 0; i != orangepyr.size(); i++) {
+        combi = Mat(orangepyr[i].size(), orangepyr[i].type());
+        for (int j = 0; j < orangepyr[i].cols; j++) {
+            if (j < orangepyr[i].cols / 2) {
+                applepyr[i].col(j).copyTo(combi.col(j));
+            } else {
+                orangepyr[i].col(j).copyTo(combi.col(j));
+            }
+        }
+        combipyr.push_back(combi);
+    }
+    
+    //Reconstruct the image of each level
+    std::vector<cv::Mat> reconstrutpyr;
+    Mat reconstruct;
+    reconstrutpyr.push_back(combipyr[combiLapyr.size()]);
+    for (std::vector<Mat>::size_type i = 0; i != combiLapyr.size(); i++) {
+        
+        cout << "test" << endl;
+        cout << combipyr[combiLapyr.size() - i - 1].size() << endl;
+        cout << combiLapyr[i].size() << endl;
+        //cv::pyrUp(combiLapyr[i], scaleUp, picsize);
+        cv::add(combipyr[combiLapyr.size() - i - 1], combiLapyr[i], reconstruct);
+        reconstrutpyr.push_back(reconstruct);
+    }
+    
+    //Display the reconstructed image for each level 
+    for(std::vector<Mat>::size_type i = 0; i != reconstrutpyr.size(); i++) {
+        imshow("Task2: Image combination", reconstrutpyr[i]);
+        cv::waitKey(0);
+    }
     // Show the blending results @ several layers
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
