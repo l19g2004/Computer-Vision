@@ -28,10 +28,10 @@ int main(int argc, char* argv[])
     // Uncomment the part of the exercise that you wish to implement.
     // For the final submission all implemented parts should be uncommented.
 
-    //part1();
-    //part2();
-    //part3();
-    //part4();
+    part1();
+    part2();
+    part3();
+    part4();
     part5();
 
     std::cout <<                                                            std::endl;
@@ -101,7 +101,6 @@ void part1()
 
     Mat diff;
     double minVal, maxVal;
-
 
 
     if(gpyr.size() == myGpyr.size()){
@@ -223,9 +222,6 @@ void part2()
     std::vector<cv::Mat> combipyr;
     std::vector<cv::Mat> combiLapyr;
     Mat combi;
-    /*
-        Muss hier noch gewichtet werden?????????
-    */
     for(std::vector<Mat>::size_type i = 0; i != orangeLapyr.size(); i++) {
         combi = Mat(orangeLapyr[i].size(), orangeLapyr[i].type());
         for (int j = 0; j < orangeLapyr[i].cols; j++) {
@@ -256,10 +252,6 @@ void part2()
     reconstrutpyr.push_back(combipyr[combiLapyr.size()]);
     for (std::vector<Mat>::size_type i = 0; i != combiLapyr.size(); i++) {
         
-        cout << "test" << endl;
-        cout << combipyr[combiLapyr.size() - i - 1].size() << endl;
-        cout << combiLapyr[i].size() << endl;
-        //cv::pyrUp(combiLapyr[i], scaleUp, picsize);
         cv::add(combipyr[combiLapyr.size() - i - 1], combiLapyr[i], reconstruct);
         reconstrutpyr.push_back(reconstruct);
     }
@@ -309,11 +301,6 @@ void part3()
 
     cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_x, im_Traffic_Gray.depth(), 1, 0, 3);
     cv::Sobel(im_Traffic_Gray, im_Traffic_Sobel_y, im_Traffic_Gray.depth(), 0, 1, 3);
-   // convertScaleAbs( im_Traffic_Sobel_x, abs_grad_x );
-   // convertScaleAbs( im_Traffic_Sobel_y, abs_grad_y );
-   // addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
-
-   // Mat orientation = Mat(abs_grad_x.rows, abs_grad_y.cols, CV_32F); //to store the gradients
 
     Mat im_Traffic_Orientations;
     im_Traffic_Gray.copyTo(im_Traffic_Orientations);
@@ -325,14 +312,12 @@ void part3()
        for(int j = 0; j < im_Traffic_Gray.cols; j++){
 
            // Store in orientation matrix element
-            //gradient = fastAtan2(abs_grad_x.at<double>(i,j), abs_grad_y.at<double>(i,j)) * 180 / M_PI;
             gradient = fastAtan2(im_Traffic_Sobel_x.at<int>(i,j), im_Traffic_Sobel_y.at<int>(i,j)) * 180 / M_PI;
 
             edgeStrength = sqrt( (im_Traffic_Sobel_x.at<int>(i,j)*im_Traffic_Sobel_x.at<int>(i,j) + im_Traffic_Sobel_y.at<int>(i,j)*im_Traffic_Sobel_y.at<int>(i,j)) );
 
             edgeStrength /= 45000;
 
-            //cout << edgeStrength << endl;
             if(edgeStrength > 1)
                 drawArrow(im_Traffic_Orientations, Point(j,i), cv::Scalar(255,255,255), 10., 5., edgeStrength, gradient);
        }
@@ -342,15 +327,6 @@ void part3()
     cout << "im_Traffic_Sobel_x " << im_Traffic_Sobel_x.rows << ", " << im_Traffic_Sobel_x .cols << " - " << im_Traffic_Sobel_x.depth() << endl;
     cout << "im_Traffic_Sobel_y " << im_Traffic_Sobel_y.rows << ", " << im_Traffic_Sobel_y .cols << " - " << im_Traffic_Sobel_y.depth()<< endl;
     cout << "im_Traffic_Orientations " << im_Traffic_Orientations.rows << ", " << im_Traffic_Orientations .cols << " - " << im_Traffic_Orientations.depth()<< endl;
-
-  //  cout << im_Traffic_Sobel_y(Rect(10,10,20,20)) << endl;
-
-// cout << abs_grad_x(Rect(10,10,20,20)) << endl;
-
-   // drawArrow(im_Traffic_Orientations, Point(10,10), cv::Scalar(255,255,255), 1., 5., 50., 1);
-
-    //drawArrow(im_Traffic_Orientations, cv::Point p, cv::Scalar(255,255,255), 1., double scaleArrowHead, double magnitube, double orientationDegrees);
-
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
@@ -478,10 +454,6 @@ void part5()
 
     float templateSum;
 
-    //cout << "type1 : "<< im_Traffic_Distances(Rect(0,0,80,80)).type() << endl;
-    //cout << "type2 : "<< im_Sign_Edges.type() << endl;
-    //cout << "type3 : "<< distancesToSign.type() << endl;
-
     for (int i=0; i < im_Traffic_Distances.rows; ++i) {
         for (int j=0;  j < im_Traffic_Distances.cols; ++j) {
 
@@ -512,8 +484,6 @@ void part5()
     // to view distances/voting space as grayscaled image
     distancesToSign.convertTo(distancesToSign, CV_8UC1);
 
-    //cout << im_Sign_Edges(Rect(10,10,20,20)) << endl;
-
     // calc position of minimum distance => detection
     double minValSign, maxValSign;
     Point minLocSign, maxLocSign;
@@ -524,14 +494,6 @@ void part5()
     rectangle(detectionSign, Rect(minLocSign.x-(0.5*im_Sign_BGR.cols),minLocSign.y-(0.5*im_Sign_BGR.rows),im_Sign_BGR.cols,im_Sign_BGR.rows), Scalar(255,255,255), 2);
 
     imshow("Task 5: Detection", distancesToSign);
-    //cout << distancesToSign(Rect(10,10,20,20)) << endl;
-
-
-   // cout << im_Traffic_Edges(Rect(10,10,20,20)) << endl;
-
-  //  cout << im_Traffic_Distances(Rect(10,10,20,20)) << endl;
-
-
 
 
     // Show results
@@ -539,10 +501,6 @@ void part5()
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     // If needed perform normalization of the image to be displayed
 
-//    imshow("Task 5: gray image", im_Traffic_Gray);
-   // imshow("Task 5: edge image", im_Traffic_Edges);
-//    imshow("Task 5: distance Transform", im_Traffic_Distances);
-//    imshow("Task 5: sign", im_Sign_Edges);
     imshow("Task 5: detection Sign", detectionSign);
 
 
