@@ -29,10 +29,10 @@ int main(int argc, char* argv[])
     // For the final submission all implemented parts should be uncommented.
 
     //part1();
-    part2();
+    //part2();
     //part3();
     //part4();
-    //part5();
+    part5();
 
     std::cout <<                                                            std::endl;
     std::cout << "/////////////////////////////////////////////////////" << std::endl;
@@ -94,7 +94,7 @@ void part1()
     // Gaussian Pyramid created with your custom way
     im_Traffic_BGR.copyTo(tmp);    
     while( (tmp.cols*0.5 > 10) && (tmp.rows*0.5 > 10) ){
-        GaussianBlur(tmp, tmp, Size(5,5), 1.5);
+        GaussianBlur(tmp, tmp, Size(3,3), 0.55);
         resize(tmp, tmp, Size((tmp.cols+1)*0.5, (tmp.rows+1)*0.5));
         myGpyr.push_back(tmp);
     }
@@ -465,34 +465,27 @@ void part5()
     cv::distanceTransform(im_Traffic_Edges, im_Traffic_Distances, CV_DIST_L2 , 3);
     normalize(im_Traffic_Distances, im_Traffic_Distances, 0, 1., NORM_MINMAX);
 
-
+    // output image with boundingbox
     Mat detectionSign;
     im_Traffic_Gray.copyTo(detectionSign);
 
+    // voting space
     Mat distancesToSign = Mat(im_Traffic_Gray.rows, im_Traffic_Gray.cols, CV_32FC1);
-
-  //  Mat integralImage;
-   // integralImage = Mat::zeros(bonn_gray.rows+1, bonn_gray.cols+1, 4);
-     //iterate through the original gray image
+    distancesToSign = 50.;
 
     normalize(im_Sign_Edges, im_Sign_Edges, 0, 1., NORM_MINMAX);
     im_Sign_Edges.convertTo(im_Sign_Edges, CV_32FC1);
 
     float templateSum;
 
-    cout << "type1 : "<< im_Traffic_Distances(Rect(0,0,80,80)).type() << endl;
-    cout << "type2 : "<< im_Sign_Edges.type() << endl;
-    cout << "type3 : "<< distancesToSign.type() << endl;
+    //cout << "type1 : "<< im_Traffic_Distances(Rect(0,0,80,80)).type() << endl;
+    //cout << "type2 : "<< im_Sign_Edges.type() << endl;
+    //cout << "type3 : "<< distancesToSign.type() << endl;
 
     for (int i=0; i < im_Traffic_Distances.rows; ++i) {
         for (int j=0;  j < im_Traffic_Distances.cols; ++j) {
 
-                templateSum = 0.;
-                if( ((i + im_Sign_Edges.rows) < im_Traffic_Distances.rows) && ((j + im_Sign_Edges.cols) < im_Traffic_Distances.cols) )
-                    distancesToSign.at<Scalar>(i,j) = sum(im_Traffic_Distances(Rect(j,i,im_Sign_Edges.rows,im_Sign_Edges.cols)) * im_Sign_Edges);
-
-
-                /*
+                templateSum = 0;
 
                 if( ((i + im_Sign_Edges.rows) < im_Traffic_Gray.rows) && ((j + im_Sign_Edges.cols) < im_Traffic_Gray.cols) ) {
 
@@ -506,16 +499,32 @@ void part5()
                     }
                 }
 
+                // vote for template
                 distancesToSign.at<float>(i,j) = templateSum;
+
                 }
-                */
+
         }
     }
+    // normalize
+    normalize(distancesToSign, distancesToSign, 0, 255, NORM_MINMAX);
 
-    cout << im_Sign_Edges(Rect(10,10,20,20)) << endl;
+    // to view distances/voting space as grayscaled image
+    distancesToSign.convertTo(distancesToSign, CV_8UC1);
 
-imshow("Task 5: BVlaa", distancesToSign);
-cout << distancesToSign(Rect(10,10,20,20)) << endl;
+    //cout << im_Sign_Edges(Rect(10,10,20,20)) << endl;
+
+    // calc position of minimum distance => detection
+    double minValSign, maxValSign;
+    Point minLocSign, maxLocSign;
+    minMaxLoc(distancesToSign, &minValSign, &maxValSign, &minLocSign, &maxLocSign);
+
+
+    // draw detected sign
+    rectangle(detectionSign, Rect(minLocSign.x-(0.5*im_Sign_BGR.cols),minLocSign.y-(0.5*im_Sign_BGR.rows),im_Sign_BGR.cols,im_Sign_BGR.rows), Scalar(255,255,255), 2);
+
+    imshow("Task 5: Detection", distancesToSign);
+    //cout << distancesToSign(Rect(10,10,20,20)) << endl;
 
 
    // cout << im_Traffic_Edges(Rect(10,10,20,20)) << endl;
@@ -530,10 +539,10 @@ cout << distancesToSign(Rect(10,10,20,20)) << endl;
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     // If needed perform normalization of the image to be displayed
 
-    imshow("Task 5: gray image", im_Traffic_Gray);
+//    imshow("Task 5: gray image", im_Traffic_Gray);
    // imshow("Task 5: edge image", im_Traffic_Edges);
-    imshow("Task 5: distance Transform", im_Traffic_Distances);
-    imshow("Task 5: sign", im_Sign_Edges);
+//    imshow("Task 5: distance Transform", im_Traffic_Distances);
+//    imshow("Task 5: sign", im_Sign_Edges);
     imshow("Task 5: detection Sign", detectionSign);
 
 
