@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <math.h>
 #include <opencv2/opencv.hpp>
 
 
@@ -41,8 +41,8 @@ int main()
     // Uncomment the part of the exercise that you wish to implement.
     // For the final submission all implemented parts should be uncommented.
 
-    part1_1();
-    //part1_2();
+    //part1_1();
+    part1_2();
     //part1_3();
     //part2_1();
     //part2_2();
@@ -134,12 +134,70 @@ void part1_2()
     // Synthetic image - No Blurring necessary for denoising !!!
 
     // Perform the steps described in the exercise sheet
-
+    
+    //////////Our solution//////////
+    //First of all blur the image
+    cv::GaussianBlur(im_Circles_Gray, im_Circles_Gray, cv::Size(3,3), 2,2);
+    
+    cv::Mat edges;
+    cv::Canny(im_Circles_Gray, edges, 1, 15);
+    
+    cv::Mat hough = cv::Mat(edges.size(), edges.type());
+    
+    for (int x = 0; x < edges.rows - 2; x++) {
+        for (int y = 0; y < edges.cols - 2; y++) {
+            /*
+            std::cout << "x: " << x << std::endl;
+                std::cout << "y: " << y << std::endl;
+                std::cout << edges.size() << std::endl;
+              */  
+            
+                for (int theta = 1; theta <= 180; theta++) {
+                    int r = y * cos(theta) + x * sin(theta);
+                    if (1 <= r && r <= 15) {
+                        std::cout << r << std::endl;
+                        hough.at<int>(r, theta) ++;
+                    }   
+                }
+            
+                
+                /*std::cout << "x: " << x << std::endl;
+                std::cout << "y: " << y << std::endl;
+                std::cout << edges.size() << std::endl;*/
+                //hough.at<cv::Vec3b>(x, y) = edges.at<cv::Vec3b>(x, y);
+                
+                /*
+                
+                double d = sqrt (pow(y - 0, 2) + pow(x - 0, 2));
+                double theta =  (edges.cols * y + 0 * x) / (sqrt(pow(edges.cols, 2) + pow(0, 2)) * sqrt(pow(x, 2) + pow(y, 2)));
+                int a = y - d * cos(theta);
+                int b = x - d * sin(theta);
+                
+                for (int i = 0; i < edges.cols - 2; i++) {
+                    int j = a * i + b;
+                    std::cout << "Berechnung: " << (a * tan(theta) - i * tan(theta) + j) << std::endl;
+                    std::cout << "b: " << b << std::endl;
+                    if (b == (a * tan(theta) - i * tan(theta) + j)) {
+                        std::cout << "test" << std::endl;
+                        hough.at<int>(i, j) = 255;
+                    }
+                                        
+                }*/
+                
+            }
+            
+            
+        
+    }
+     
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
     // If needed perform normalization of the image to be displayed
 
+    cv::imshow("Part 1 2", edges);
+    cv::imshow("test", hough);
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
