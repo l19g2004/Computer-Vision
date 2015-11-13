@@ -41,7 +41,7 @@ int main()
     // Uncomment the part of the exercise that you wish to implement.
     // For the final submission all implemented parts should be uncommented.
 
-    //part1_1();
+    part1_1();
     //part1_2();
     //part1_3();
     //part2_1();
@@ -80,14 +80,33 @@ void part1_1()
     // BGR to Gray
     cv::Mat                       im_Circles_Gray;
     cv::cvtColor( im_Circles_BGR, im_Circles_Gray, cv::COLOR_BGR2GRAY );
+    
     // Synthetic image - No Blurring necessary for denoising !!!
-
+    
     // Perform the steps described in the exercise sheet
+    
+    ///////////Our Solution/////////////////////
+    //First of all blur the image
+    cv::GaussianBlur(im_Circles_Gray, im_Circles_Gray, cv::Size(3,3), 2,2);
+    
+    //initalize a vector to store the detected circles 
+    std::vector<cv::Vec3f> circles;
+    
+    //apply the hough transform for circles
+    cv::HoughCircles(im_Circles_Gray, circles, CV_HOUGH_GRADIENT, 1, 2, 1, 15, 0, 0);
+    
+    //iterate through the vector of detected circles
+    for (std::size_t i = 0; i < circles.size(); i++) {
+        //draw for each detected a red circle into the original image
+        cv::Point center = cv::Point(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        cv::circle(im_Circles_BGR, center, cvRound(circles[i][2]), cv::Scalar(0, 0, 255));                
+    }
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    cv::imshow("Part 1 1", im_Circles_BGR);
+    cv::waitKey(0); 
     cv::destroyAllWindows();
 }
 
