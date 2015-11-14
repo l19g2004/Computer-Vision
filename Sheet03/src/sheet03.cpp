@@ -2,6 +2,7 @@
 #include <math.h>
 #include <opencv2/opencv.hpp>
 
+using namespace cv;
 
 void customHoughCircles(  const cv::Mat                &ImageGRAY,
                                 std::vector<cv::Vec3f> &detectedCircles,      // OUT
@@ -46,7 +47,7 @@ int main()
     //part1_3();
     part2_1();
     part2_2();
-    //part2_3();
+    part2_3();
     //part3();
 
     std::cout <<                                                                                                   std::endl;
@@ -142,24 +143,51 @@ void part1_2()
     cv::Mat edges;
     cv::Canny(im_Circles_Gray, edges, 1, 15);
     
-    cv::Mat hough = cv::Mat(edges.size(), edges.type());
+    cv::Mat hough = cv::Mat::zeros(edges.size(), CV_32FC3);
     
+  //  const int sizes[] = { 100, 100, 100 };
+  //  cv::Mat hough2 = cv::Mat::zeros(3, sizes, CV_32F);
+
+
+    //std::cout << edges(cv::Range(0, 100), cv::Range(0, 100)) << std::endl;
+
+
+
+
     for (int x = 0; x < edges.rows - 2; x++) {
         for (int y = 0; y < edges.cols - 2; y++) {
+
+                // for each edge point
+                if(edges.at<uchar>(y,x) == 255) {
+
+                    for (int r = 0; r < 50; r++) {
+
+                        for (int theta = 0; theta < 180; theta++) {
+
+                            //int d = x * cos(theta) + y * sin(theta);
+
+                            int a = x - r * cos(theta);
+                            int b = x - r * sin(theta);
+
+                            // std::cout << r << std::endl;
+                          //  hough.at<float>(d, theta) ++;
+
+                        }
+
+                    }
+
+                }
+
+
             /*
-            std::cout << "x: " << x << std::endl;
-                std::cout << "y: " << y << std::endl;
-                std::cout << edges.size() << std::endl;
-              */  
-            
                 for (int theta = 1; theta <= 180; theta++) {
                     int r = y * cos(theta) + x * sin(theta);
                     if (1 <= r && r <= 15) {
-                        std::cout << r << std::endl;
+                       // std::cout << r << std::endl;
                         hough.at<int>(r, theta) ++;
                     }   
                 }
-            
+            */
                 
                 /*std::cout << "x: " << x << std::endl;
                 std::cout << "y: " << y << std::endl;
@@ -186,9 +214,15 @@ void part1_2()
                 
             }
             
-            
+
         
     }
+
+   // std::cout << hough(cv::Range(0, 100), cv::Range(0, 100)) << std::endl;
+
+
+   // std::cout << "counter " << counter << std::endl;
+
      
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
@@ -263,39 +297,45 @@ void part2_1()
     cv::Mat                                              flower;
     cv::imread( PATH_Flower, cv::IMREAD_COLOR).convertTo(flower, CV_32FC3, (1./255.)); // image normalized [0,255] -> [0,1]
     cv::imshow("original image",                         flower);
+
     // gray version of flower
     cv::Mat              flower_gray;
     cv::cvtColor(flower, flower_gray, CV_BGR2GRAY);
     cv::imshow("gray image", flower_gray);
     // Perform the steps described in the exercise sheet
     
-    
+
     cv::Mat map(flower_gray.rows * flower_gray.cols, 3, flower_gray.type());
     for (int x = 0; x < flower_gray.rows; x++) {
         for (int y = 0; y < flower_gray.cols; y++) {
             for(int z = 0; z < 3; z++) {
-                map.at<float>(x + y * flower_gray.rows, z) = flower_gray.at<cv::Vec3b>(x, y)[z];
+                map.at<float>(x + y * flower_gray.rows, z) = flower_gray.at<cv::Vec3f>(x, y)[z];
             }           
         }
     }
     
+
+
     cv::Mat bestLabels;
     cv::Mat center;
+    cv::Mat result(flower_gray.size(), flower_gray.type());
     for (int k = 2; k <= 10; k = k + 2) {
-        cv::Mat result(flower_gray.size(), flower_gray.type());
         cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
+
         for (int x = 0; x < flower_gray.rows; x++) {
             for (int y = 0; y < flower_gray.cols; y++) {
                 
                 int index = bestLabels.at<int>(x + y * flower_gray.rows, 0);
-                result.at<cv::Vec3b>(x, y) [0] = center.at<float>(index, 0);
-                result.at<cv::Vec3b>(x, y) [1] = center.at<float>(index, 1);
-                result.at<cv::Vec3b>(x, y) [2] = center.at<float>(index, 2);
+                result.at<cv::Vec3f>(x, y) [0] = center.at<float>(index, 0);
+                result.at<cv::Vec3f>(x, y) [1] = center.at<float>(index, 1);
+                result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 2);
             }
         }
         cv::imshow("Intensity " + std::to_string(k), result);
     }
-    
+
+
+
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
@@ -336,23 +376,23 @@ void part2_2()
     for (int x = 0; x < flower.rows; x++) {
         for (int y = 0; y < flower.cols; y++) {
             for(int z = 0; z < 3; z++) {
-                map.at<float>(x + y * flower.rows, z) = flower.at<cv::Vec3b>(x, y)[z];
+                map.at<float>(x + y * flower.rows, z) = flower.at<cv::Vec3f>(x, y)[z];
             }           
         }
     }
     
     cv::Mat bestLabels;
     cv::Mat center;
+    cv::Mat result(flower.size(), flower.type());
     for (int k = 2; k <= 10; k = k + 2) {
-        cv::Mat result(flower.size(), flower.type());
         cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
         for (int x = 0; x < flower.rows; x++) {
             for (int y = 0; y < flower.cols; y++) {
                 
                 int index = bestLabels.at<int>(x + y * flower.rows, 0);
-                result.at<cv::Vec3b>(x, y) [0] = center.at<float>(index, 0);
-                result.at<cv::Vec3b>(x, y) [1] = center.at<float>(index, 1);
-                result.at<cv::Vec3b>(x, y) [2] = center.at<float>(index, 2);
+                result.at<cv::Vec3f>(x, y) [0] = center.at<float>(index, 0);
+                result.at<cv::Vec3f>(x, y) [1] = center.at<float>(index, 1);
+                result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 2);
             }
         }
         cv::imshow("Color " + std::to_string(k), result);
