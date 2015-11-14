@@ -42,10 +42,10 @@ int main()
     // For the final submission all implemented parts should be uncommented.
 
     //part1_1();
-    part1_2();
+    //part1_2();
     //part1_3();
-    //part2_1();
-    //part2_2();
+    part2_1();
+    part2_2();
     //part2_3();
     //part3();
 
@@ -266,13 +266,40 @@ void part2_1()
     // gray version of flower
     cv::Mat              flower_gray;
     cv::cvtColor(flower, flower_gray, CV_BGR2GRAY);
-
+    cv::imshow("gray image", flower_gray);
     // Perform the steps described in the exercise sheet
-
+    
+    
+    cv::Mat map(flower_gray.rows * flower_gray.cols, 3, flower_gray.type());
+    for (int x = 0; x < flower_gray.rows; x++) {
+        for (int y = 0; y < flower_gray.cols; y++) {
+            for(int z = 0; z < 3; z++) {
+                map.at<float>(x + y * flower_gray.rows, z) = flower_gray.at<cv::Vec3b>(x, y)[z];
+            }           
+        }
+    }
+    
+    cv::Mat bestLabels;
+    cv::Mat center;
+    for (int k = 2; k <= 10; k = k + 2) {
+        cv::Mat result(flower_gray.size(), flower_gray.type());
+        cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
+        for (int x = 0; x < flower_gray.rows; x++) {
+            for (int y = 0; y < flower_gray.cols; y++) {
+                
+                int index = bestLabels.at<int>(x + y * flower_gray.rows, 0);
+                result.at<cv::Vec3b>(x, y) [0] = center.at<float>(index, 0);
+                result.at<cv::Vec3b>(x, y) [1] = center.at<float>(index, 1);
+                result.at<cv::Vec3b>(x, y) [2] = center.at<float>(index, 2);
+            }
+        }
+        cv::imshow("Intensity " + std::to_string(k), result);
+    }
+    
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
@@ -305,10 +332,36 @@ void part2_2()
 
     // Perform the steps described in the exercise sheet
 
+    cv::Mat map(flower.rows * flower.cols, 3, flower.type());
+    for (int x = 0; x < flower.rows; x++) {
+        for (int y = 0; y < flower.cols; y++) {
+            for(int z = 0; z < 3; z++) {
+                map.at<float>(x + y * flower.rows, z) = flower.at<cv::Vec3b>(x, y)[z];
+            }           
+        }
+    }
+    
+    cv::Mat bestLabels;
+    cv::Mat center;
+    for (int k = 2; k <= 10; k = k + 2) {
+        cv::Mat result(flower.size(), flower.type());
+        cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
+        for (int x = 0; x < flower.rows; x++) {
+            for (int y = 0; y < flower.cols; y++) {
+                
+                int index = bestLabels.at<int>(x + y * flower.rows, 0);
+                result.at<cv::Vec3b>(x, y) [0] = center.at<float>(index, 0);
+                result.at<cv::Vec3b>(x, y) [1] = center.at<float>(index, 1);
+                result.at<cv::Vec3b>(x, y) [2] = center.at<float>(index, 2);
+            }
+        }
+        cv::imshow("Color " + std::to_string(k), result);
+    }
+
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
