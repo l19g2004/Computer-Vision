@@ -47,8 +47,8 @@ int main()
     //part1_3();
  //   part2_1();
  //   part2_2();
-    part2_3();
-    //part3();
+//    part2_3();
+    part3();
 
     std::cout <<                                                                                                   std::endl;
     std::cout << "////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
@@ -505,10 +505,53 @@ void part3()
 
     // Perform the steps described in the exercise sheet
 
+
+    cv::Mat map(flower_luv.rows * flower_luv.cols, 5, flower_luv.type());
+    for (int x = 0; x < flower_luv.rows; x++) {
+        for (int y = 0; y < flower_luv.cols; y++) {
+
+            map.at<float>(x + y * flower_luv.rows, 0) = flower_luv.at<cv::Vec3f>(x, y)[0]; // L   color space
+            map.at<float>(x + y * flower_luv.rows, 1) = flower_luv.at<cv::Vec3f>(x, y)[1]; // u   color space
+            map.at<float>(x + y * flower_luv.rows, 2) = flower_luv.at<cv::Vec3f>(x, y)[2]; // v   color space
+            map.at<float>(x + y * flower_luv.rows, 3) = x*(1./flower_luv.rows);           // scaled image position x
+            map.at<float>(x + y * flower_luv.rows, 4) = y*(1./flower_luv.cols);           // scaled image position y
+        }
+    }
+
+    //std::cout <<"map "<<map.at<float>(0, 0)<<", "<<map.at<float>(0, 1)<<", "<<map.at<float>(0, 2)<<", "<<map.at<float>(0, 3)  <<", "<<map.at<float>(0, 4)<< std::endl;
+
+
+
+    cv::Mat bestLabels;
+    cv::Mat center;
+    cv::Mat result(flower_luv.size(), flower_luv.type());
+    for (int k = 2; k <= 10; k = k + 2) {
+        cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
+
+        for (int x = 0; x < flower_luv.rows; x++) {
+            for (int y = 0; y < flower_luv.cols; y++) {
+
+                int index = bestLabels.at<int>(x + y * flower_luv.rows, 0);
+                result.at<cv::Vec3f>(x, y) [0] = center.at<float>(index, 0);    //  L
+                result.at<cv::Vec3f>(x, y) [1] = center.at<float>(index, 1);    //  u    color space
+                result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 2);    //  v
+            }
+        }
+        // change color space back to BGR-color
+        cv::cvtColor(result, result, CV_Luv2BGR);
+        cv::imshow("Luv-color and position k=" + std::to_string(k), result);
+    }
+
+
+    //std::cout <<"result "<<result.at<cv::Vec3f>(0, 0) [0]<<", "<<result.at<cv::Vec3f>(0, 0) [1]<<", "<<result.at<cv::Vec3f>(0, 0) [2]<< std::endl;
+
+
+
+
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
