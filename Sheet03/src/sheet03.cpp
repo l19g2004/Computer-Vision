@@ -45,8 +45,8 @@ int main()
     //part1_1();
     //part1_2();
     //part1_3();
-    part2_1();
-    part2_2();
+ //   part2_1();
+ //   part2_2();
     part2_3();
     //part3();
 
@@ -268,6 +268,10 @@ void part1_3()
 
     // Perform the steps described in the exercise sheet
 
+
+
+
+
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
@@ -331,7 +335,7 @@ void part2_1()
                 result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 2);
             }
         }
-        cv::imshow("Intensity " + std::to_string(k), result);
+        cv::imshow("Intensity k=" + std::to_string(k), result);
     }
 
 
@@ -395,7 +399,7 @@ void part2_2()
                 result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 2);
             }
         }
-        cv::imshow("Color " + std::to_string(k), result);
+        cv::imshow("Color k=" + std::to_string(k), result);
     }
 
     // Show results
@@ -422,22 +426,55 @@ void part2_3()
     std::cout << "////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
     std::cout << "////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
 
-    std::cout << "\n" << "kmeans with gray and pixel coordinates" << std::endl;
+    std::cout << "\n" << "kmeans with gray and pixel coordinates" << std::endl;  
 
     // read the image file flower
     cv::Mat                                              flower;
     cv::imread( PATH_Flower, cv::IMREAD_COLOR).convertTo(flower, CV_32FC3, (1./255.)); // image normalized [0,255] -> [0,1]
+    cv::imshow("original image",                         flower);
+
     // gray version of flower
     cv::Mat              flower_gray;
     cv::cvtColor(flower, flower_gray, CV_BGR2GRAY);
-    cv::imshow("original image", flower);
-
+    cv::imshow("gray image", flower_gray);
     // Perform the steps described in the exercise sheet
+
+
+    cv::Mat map(flower_gray.rows * flower_gray.cols, 3, flower_gray.type());
+    for (int x = 0; x < flower_gray.rows; x++) {
+        for (int y = 0; y < flower_gray.cols; y++) {
+
+            map.at<float>(x + y * flower_gray.rows, 0) = flower_gray.at<cv::Vec3f>(x, y)[0]; // intensity value
+            map.at<float>(x + y * flower_gray.rows, 1) = x*(1./flower_gray.rows);           // scaled image position x
+            map.at<float>(x + y * flower_gray.rows, 2) = y*(1./flower_gray.cols);           // scaled image position y
+        }
+    }
+
+
+    cv::Mat bestLabels;
+    cv::Mat center;
+    cv::Mat result(flower_gray.size(), flower_gray.type());
+    for (int k = 2; k <= 10; k = k + 2) {
+        cv::kmeans(map, k, bestLabels, cv::TermCriteria(), 5, cv::KMEANS_PP_CENTERS, center);
+
+        for (int x = 0; x < flower_gray.rows; x++) {
+            for (int y = 0; y < flower_gray.cols; y++) {
+
+                int index = bestLabels.at<int>(x + y * flower_gray.rows, 0);
+                result.at<cv::Vec3f>(x, y) [0] = center.at<float>(index, 0);    // just visualize the intensity values
+                result.at<cv::Vec3f>(x, y) [1] = center.at<float>(index, 0);
+                result.at<cv::Vec3f>(x, y) [2] = center.at<float>(index, 0);
+            }
+        }
+        cv::imshow("Intensity and position k=" + std::to_string(k), result);
+    }
+
+
 
     // Show results
     // using **cv::imshow and cv::waitKey()** and when necessary **std::cout**
     // In the end, after the last cv::waitKey(), use **cv::destroyAllWindows()**
-
+    cv::waitKey(0);
     cv::destroyAllWindows();
 }
 
