@@ -107,7 +107,7 @@ void part1()
     snakes( coffee, center, radius, snake );
     ////////////////////////////////////////
     /// \brief cv::destroyAllWindows
-    cv::imwrite("../images/ball_output.png", ball); // save image
+    cv::imwrite("../images/coffee_output.png", coffee); // save image
 
     cv::destroyAllWindows();
 }
