@@ -33,6 +33,7 @@ void    showContour(       const cv::Mat& img, const cv::Mat& contour,          
 void    levelSetContours(  const cv::Mat& img, const cv::Point2f center,        const float radius, cv::Mat& phi);
 cv::Mat computeContour(    const cv::Mat& phi, const float level );
 
+int imwrite_counter = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,7 @@ void part1()
     //////////////////////////////////////
     snakes( ball, center, radius, snake );
     //////////////////////////////////////
+    cv::imwrite("../images/ball_output.png", ball); // save image
 
     std::cout << "coffee image" << std::endl;
     // for snake initialization
@@ -104,6 +106,8 @@ void part1()
     ////////////////////////////////////////
     snakes( coffee, center, radius, snake );
     ////////////////////////////////////////
+    /// \brief cv::destroyAllWindows
+    cv::imwrite("../images/ball_output.png", ball); // save image
 
     cv::destroyAllWindows();
 }
@@ -186,10 +190,16 @@ void snakes( const cv::Mat&                     img,
     cv::Mat     vis;
     img.copyTo( vis );
     drawSnake(  vis, snake);
+    vis.convertTo(vis,CV_8UC3,255.0);
+    vis.copyTo(img);
     ///////////////////////////////////////////////////////////
     std::cout << "Press any key to continue...\n" << std::endl;
     ///////////////////////////////////////////////////////////
+    /// \brief cv::imshow
+    ///
     cv::imshow("Snake", vis);
+
+
     cv::waitKey();
 
     // Perform optimization of the initialized snake as described in the exercise sheet and the slides.
