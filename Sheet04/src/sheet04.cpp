@@ -50,7 +50,7 @@ int main()
     // For the final submission all implemented parts should be uncommented.
 
     part1();
-//    part2();
+    part2();
 
     std::cout <<                                                                                                   std::endl;
     std::cout << "////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
@@ -146,6 +146,7 @@ void part2()
     /////////////////////////////////////////////////////////
     levelSetContours(     ball,    center, radius, phi     );
     /////////////////////////////////////////////////////////
+    cv::imwrite("../images/ball_output2.png", ball); // save image
 
     std::cout << "coffee image" << std::endl;
     center = cv::Point2f( coffee.cols/2.f, coffee.rows/2.f );
@@ -153,6 +154,8 @@ void part2()
     /////////////////////////////////////////////////////////
     levelSetContours(     coffee,  center, radius, phi     );
     /////////////////////////////////////////////////////////
+    /// \brief cv::destroyAllWindows
+    cv::imwrite("../images/coffee_output2.png", coffee); // save image
 
     cv::destroyAllWindows();
 }
@@ -334,6 +337,8 @@ void showContour( const cv::Mat& img, const cv::Mat& contour, const int t )
         for (int x=0; x<img.cols; x++)
             temp.at<cv::Vec3f>(y,x) = contour.at<uchar>(y,x)!=255 ? img.at<cv::Vec3f>(y,x) : color;
 
+    temp.convertTo(temp,CV_8UC3,255.0);
+    temp.copyTo(img);
     cv::imshow("contour", temp);
     cv::waitKey(t);
 }
