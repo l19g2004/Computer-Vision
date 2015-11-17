@@ -14,8 +14,8 @@
 void part1();
 void part2();
 
-std::string PATH_Ball   = "./images/ball.png";
-std::string PATH_Coffee = "./images/coffee.png";
+std::string PATH_Ball   = "../images/ball.png";
+std::string PATH_Coffee = "../images/coffee.png";
 
 
 //////////////////////////////////////
@@ -49,7 +49,7 @@ int main()
     // For the final submission all implemented parts should be uncommented.
 
     part1();
-    part2();
+//    part2();
 
     std::cout <<                                                                                                   std::endl;
     std::cout << "////////////////////////////////////////////////////////////////////////////////////////////" << std::endl;
@@ -198,6 +198,8 @@ void snakes( const cv::Mat&                     img,
     // - optimal solution for every point is the center of a 3x3 (or similar) box, OR
     // - until maximum number of iterations is reached
 
+
+
     // At each step visualize the current result
     // using **drawSnake() and cv::waitKey(10)** as in the example above and when necessary **std::cout**
     // In the end, after the last visualization, use **cv::destroyAllWindows()**
@@ -214,9 +216,10 @@ void drawSnake(       cv::Mat                   img,
 {
     const size_t siz = snake.size();
 
-    for (size_t iii=0; iii<siz; iii++)
+    for (size_t iii=0; iii<siz; iii++){
         cv::line( img, snake[iii], snake[(iii+1)%siz], cv::Scalar(0,0,1) );
-
+        cv::putText( img, std::to_string(iii), snake[iii], 1, 0.5, cv::Scalar(0,0,0) ); // label each point with v_i number
+    }
     for (const cv::Point2i& p: snake)
         cv::circle( img, p, 2, cv::Scalar(1,0,0), -1 );
 }
